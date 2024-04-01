@@ -38,7 +38,9 @@ export default {
       dargeGraph: null,
       isShowOverview: true,
       isShowNode: false,
-      isShowEdge: false
+      isShowEdge: false,
+      isShowSelect: false,
+      selectList: []
     }
   },
   components: {
@@ -307,6 +309,7 @@ export default {
     },
     GraphSelectEvent (e) {
       console.log(e)
+      // 切换展示状态
       switch (e.dataType) {
         case 'node':
           this.NodeShowEvent(e)
@@ -317,15 +320,18 @@ export default {
         default:
           this.UnselectEvent(e)
       }
-      // 切换展示状态
     },
     UnselectEvent (e) {
-      // 切换展示状态
-      console.log(e)
       if (e.target === undefined) {
         this.isShowOverview = true
         this.isShowNode = false
         this.isShowEdge = false
+        // 切换缩放和中心点
+        this.$refs.dagChart.setOption({
+          series: [{
+            zoom: 1,
+          }]
+        })
       }
     },
     EdgeShowEvent (e) {
@@ -337,6 +343,45 @@ export default {
       this.isShowNode = true
       this.isShowOverview = false
       this.isShowEdge = false
+      // 处理多选节点
+      this.CheckSelectedList(e)
+      // 处理缩放
+      // 设置选中状态
+      this.$refs.dagChart.dispatchAction({
+        type: 'toggleSelect',
+        seriesIndex: e.seriesIndex,
+        dataIndex: e.dataIndex
+      })
+      var nodeData = this.$refs.dagChart.getOption().series[e.seriesIndex].data[e.dataIndexInside]
+      console.log(nodeData)
+      // 处理缩放
+      var selectedNodeX = nodeData.x
+      var selectedNodeY = nodeData.y
+      // 设置新的视图中心为选中节点的位置
+      this.$refs.dagChart.setOption({
+        series: [{
+          center: [selectedNodeX, selectedNodeY]
+        }]
+      })
+      // 进行放大缩放
+      this.$refs.dagChart.setOption({
+        series: [{
+          zoom: 5
+        }]
+      })
+    },
+    CheckSelectedList (e) {
+      // 添加/移除选中列表
+      // 判断是否在列表中
+      if (this.selectList.find(x => x === e) === undefined) { // 如果不在，则添加进列表
+        this.selectList.push(e)
+      } else { // 否则，移出列表
+        this.selectList.pop(e)
+      }
+      // 进行选中列表的合法性检查
+      this.selectList.find(x => x.dataIndexInside === 0)
+      // 如果合法，则在右侧展示路径信息
+      console.log(this.selectList)
     }
   }
 }
@@ -347,7 +392,7 @@ export default {
     <el-aside width="70%">
       <div style="height: 95%; width:98%">
         <el-col style="height: 50%">
-          <vchart class="echart" :option="option" :autoresize="true" ref="vchart"
+          <vchart class="echart" :option="option" :autoresize="true" ref="dagChart"
                   @select="GraphSelectEvent"
                   @unselect="UnselectEvent"
                   @zr:click="UnselectEvent">
@@ -355,7 +400,7 @@ export default {
         </el-col>
         <el-divider/>
         <el-col style="height: 50%">
-          <vchart class="echart" :option="sOption" :autoresize="true" ref="vchart"
+          <vchart class="echart" :option="sOption" :autoresize="true" ref="sankeyChart"
                   @select="GraphSelectEvent"
                   @unselect="UnselectEvent"
                   @zr:click="UnselectEvent">

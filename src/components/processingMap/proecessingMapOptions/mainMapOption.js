@@ -1,6 +1,11 @@
 export const mainOption = {
   title: {},
   tooltip: {},
+  dataZoom: {
+    type: 'inside',
+    id: 0,
+    disabled: false,
+  },
   animationDurationUpdate: 1500,
   animationEasingUpdate:
     'quinticInOut',
@@ -10,11 +15,9 @@ export const mainOption = {
         type: 'graph',
         layout: 'none',
         symbolSize: 20,
+        selectedMode: 'multiple',
+        select: {},
         roam: true,
-        // label: {
-        //   show: true,
-        //   fontSize: 12,
-        // },
         lineStyle: {
           color: 'source'
         },
