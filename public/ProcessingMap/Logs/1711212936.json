@@ -1,0 +1,60 @@
+{
+  "logID": "1711212922",
+  "tag": "0.1",
+  "nodes": [
+    {
+      "nodeType": "Event",
+      "nodeIndex": 0,
+      "chosenOptionIndex": 0,
+      "costTime": 0.0
+    },
+    {
+      "nodeType": "InteractionPoint",
+      "nodeIndex": 0,
+      "chosenOptionIndex": 2,
+      "costTime": 0.0
+    },
+    {
+      "nodeType": "Input",
+      "nodeIndex": 2,
+      "chosenOptionIndex": 0,
+      "costTime": 0.0
+    },
+    {
+      "nodeType": "Feedback",
+      "nodeIndex": 2,
+      "chosenOptionIndex": 0,
+      "costTime": 0.0
+    },
+    {
+      "nodeType": "Event",
+      "nodeIndex": 2,
+      "chosenOptionIndex": 0,
+      "costTime": 0.0
+    },
+    {
+      "nodeType": "InteractionPoint",
+      "nodeIndex": 2,
+      "chosenOptionIndex": 5,
+      "costTime": 1.0
+    },
+    {
+      "nodeType": "Input",
+      "nodeIndex": 5,
+      "chosenOptionIndex": 0,
+      "costTime": 0.0
+    },
+    {
+      "nodeType": "Feedback",
+      "nodeIndex": 5,
+      "chosenOptionIndex": 0,
+      "costTime": 0.0
+    },
+    {
+      "nodeType": "End",
+      "nodeIndex": 1,
+      "chosenOptionIndex": 0,
+      "costTime": 0.0
+    }
+  ]
+}

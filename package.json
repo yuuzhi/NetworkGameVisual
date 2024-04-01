@@ -1,0 +1,73 @@
+{
+  "name": "vis",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "serve": "vue-cli-service serve",
+    "build": "vue-cli-service build",
+    "lint": "vue-cli-service lint",
+    "dev": "vue-cli-service serve dev"
+  },
+  "dependencies": {
+    "@antv/graphlib": "^2.0.2",
+    "@antv/layout": "^0.3.25",
+    "@dagrejs/dagre": "^1.1.1",
+    "@element-plus/icons-vue": "^2.3.1",
+    "autoprefixer": "^10.4.18",
+    "axios": "^1.6.8",
+    "browserify": "^17.0.0",
+    "core-js": "^3.8.3",
+    "echarts": "^5.5.0",
+    "element-plus": "^2.6.1",
+    "esdk-obs-nodejs": "^3.23.11",
+    "fs": "^0.0.1-security",
+    "git": "^0.1.5",
+    "ngraph.graph": "^20.0.1",
+    "ngraph.hlayout": "^2.0.1",
+    "v-charts": "^1.17.10",
+    "vue": "^3.2.13",
+    "vue-echarts": "^6.6.9",
+    "vue-router": "^4.0.3",
+    "vuex": "^4.0.0"
+  },
+  "devDependencies": {
+    "@babel/core": "^7.12.16",
+    "@babel/eslint-parser": "^7.12.16",
+    "@vue/cli-plugin-babel": "~5.0.0",
+    "@vue/cli-plugin-eslint": "~5.0.0",
+    "@vue/cli-plugin-router": "~5.0.0",
+    "@vue/cli-plugin-vuex": "~5.0.0",
+    "@vue/cli-service": "~5.0.8",
+    "@vue/eslint-config-standard": "^6.1.0",
+    "eslint": "^7.32.0",
+    "eslint-plugin-import": "^2.25.3",
+    "eslint-plugin-node": "^11.1.0",
+    "eslint-plugin-promise": "^5.1.0",
+    "eslint-plugin-vue": "^7.0.0",
+    "postcss-px-to-viewport": "^1.1.1"
+  },
+  "eslintConfig": {
+    "root": true,
+    "env": {
+      "node": true
+    },
+    "extends": [
+      "plugin:vue/vue3-essential",
+      "@vue/standard"
+    ],
+    "parserOptions": {
+      "parser": "@babel/eslint-parser"
+    },
+    "rules": {
+      "no-unused-vars": "off",
+      "no-irregular-whitespace": "off",
+      "comma-dangle": 0
+    }
+  },
+  "browserslist": [
+    "> 1%",
+    "last 2 versions",
+    "not dead",
+    "not ie 11"
+  ]
+}
