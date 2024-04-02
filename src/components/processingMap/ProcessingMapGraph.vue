@@ -9,6 +9,7 @@ import ECharts from 'vue-echarts'
 import OverviewComponent from '@/components/processingMap/OverviewComponent.vue'
 import NodeInformationComponent from '@/components/processingMap/NodeInformationComponent.vue'
 import EdgeInformationComponent from '@/components/processingMap/EdgeInformationComponent.vue'
+import PathInformationComponent from '@/components/processingMap/PathInformationComponent.vue'
 
 const nodeType = new Map([[0, 'InteractionPoint'],
   [1, 'Option'],
@@ -40,34 +41,37 @@ export default {
       isShowNode: false,
       isShowEdge: false,
       isShowSelect: false,
+      isShowPath: false,
+      isClearSelected: false,
       selectList: []
     }
   },
   components: {
+    PathInformationComponent,
     EdgeInformationComponent,
     NodeInformationComponent,
     OverviewComponent,
     vchart: ECharts
   },
   mounted () {
-    // ref(axios.get($NetworkStoreUrl + 'processingMapGraph.json').then((res) => {
-    //   this.graphMap = res
-    //   console.log(res)
-    // }))
-    // ref(axios.get($NetworkStoreUrl + 'processingMapData.json').then((data) => {
-    //   this.graphData = data
-    //   console.log(data)
-    // }))
-
-    // 本地
-    ref(axios.get('/ProcessingMap/processingMapGraph.json').then((res) => {
+    ref(axios.get($NetworkStoreUrl + 'processingMapGraph.json').then((res) => {
       this.graphMap = res
-      // console.log(res)
+      console.log(res)
     }))
-    ref(axios.get('/ProcessingMap/processingMapData.json').then((data) => {
+    ref(axios.get($NetworkStoreUrl + 'processingMapData.json').then((data) => {
       this.graphData = data
-      // console.log(data)
+      console.log(data)
     }))
+
+    // // 本地
+    // ref(axios.get('/ProcessingMap/processingMapGraph.json').then((res) => {
+    //   this.graphMap = res
+    //   // console.log(res)
+    // }))
+    // ref(axios.get('/ProcessingMap/processingMapData.json').then((data) => {
+    //   this.graphData = data
+    //   // console.log(data)
+    // }))
   },
   watch: {
     graphMap (newVal, oldVal) {
@@ -76,6 +80,13 @@ export default {
     },
     graphData (newVal) {
       this.ReadPathMakeProcessingData()
+    },
+    selectList: {
+      handler (newVal) {
+        // console.log(newVal)
+        this.CheckSelectedList(0)
+      },
+      deep: true
     },
     async userData () {
       // console.log(this.sOption.series[0].links)
@@ -102,21 +113,13 @@ export default {
               // source->target所经过的option
               var temp3 = this.graphMap.data.nodes[optionIndex]
 
-              // var sourceName = nodeType.get(temp1.nodeType) + ' ' + this.graphMap.data.nodes.indexOf(temp1) + '->' +
-              //   nodeType.get(temp3.nodeType) + ' ' +
               var sourceName = nodeType.get(temp1.nodeType) + ' ' + this.graphMap.data.nodes.indexOf(temp1)
               var targetName = nodeType.get(temp2.nodeType) + ' ' + this.graphMap.data.nodes.indexOf(temp2)
-              // console.log(sourceName, targetName)
-              // this.data.point2Option.get(this.GetNodeArrayIndex(node.nodeType, node.nodeIndex):获得Map数组
               if (this.sOption.series[0].links.findIndex(
                 l => ((l.source === sourceName) && (l.target === targetName))) > -1) {
                 this.sOption.series[0].links[this.sOption.series[0].links.findIndex(
                   l => ((l.source === sourceName) && (l.target === targetName)
                   )) + pointOption.get(this.GetNodeArrayIndex(log.nodes[nextIndex].nodeType, log.nodes[nextIndex].nodeIndex)).findIndex(i => i === optionIndex)].value++
-                // console.log(pointOption.get(this.GetNodeArrayIndex(log.nodes[nextIndex].nodeType, log.nodes[nextIndex].nodeIndex)))
-                // console.log('index:', this.sOption.series[0].links.findIndex(
-                //   l => ((l.source === sourceName) && (l.target === targetName)
-                //   )), '+', pointOption.get(this.GetNodeArrayIndex(log.nodes[nextIndex].nodeType, log.nodes[nextIndex].nodeIndex)).findIndex(i => i === optionIndex), optionIndex)
               }
               break
           }
@@ -131,14 +134,10 @@ export default {
 
       axios.get($LogStoreUrl + basePath)
         .then(async (response) => {
-          // console.log('response', response)
           var dom = new DOMParser()
           var res = dom.parseFromString(response.data, 'text/xml')
-          // console.log('res', res)
           const fileNames = res.getElementsByTagName('Contents')
-          // console.log('fileNames', fileNames)
           for (const fileName of fileNames) {
-            // console.log('key', fileName.getElementsByTagName('Key'))
             if (fileName.getElementsByTagName('Key')[0].innerHTML.endsWith('.json')) {
               var name = fileName.getElementsByTagName('Key')[0].innerHTML
               const jsonFileResponse = await axios.get($LogStoreUrl + basePath + name)
@@ -154,8 +153,6 @@ export default {
     ReadJsonMakeProcessingGraph () {
       // 测试
       this.dargeGraph = new dagre.graphlib.Graph()
-
-      // console.log(this.graphMap.data)
 
       // Set an object for the graph label
       this.dargeGraph.setGraph({
@@ -243,16 +240,12 @@ export default {
         if (node.data.nodeType === 0 || node.data.nodeType === 5) {
           processingMapGraph.forEachLinkedNode(node.id, n => {
             var tempOption = []
-            // console.log(n.id)
             currentResult = []
             FindNextInteractionNode(n.id)
             var nextNode = currentResult
             if (nextNode !== null) {
               nextNode.forEach(nextNode => {
                 // 把边塞进桑基图
-                // console.log(nextNode)
-                // console.log(nodeType.get(node.data.nodeType) + ' ' + node.id, '->',
-                //   nodeType.get(nextNode.data.nodeType) + ' ' + nextNode.id)
                 this.sOption.series[0].links.push({
                   source: nodeType.get(node.data.nodeType) + ' ' + node.id,
                   target: nodeType.get(nextNode.data.nodeType) + ' ' + nextNode.id,
@@ -277,7 +270,6 @@ export default {
       })
       pointOption = point2OptionMap
 
-      // console.log(point2OptionMap)
       var currentResult = []
 
       function FindNextInteractionNode (id) {
@@ -322,29 +314,33 @@ export default {
       }
     },
     UnselectEvent (e) {
+      if (e.dataType === 'node') {
+        if (this.selectList.find(x => x.dataIndexInside === e.dataIndexInside)) {
+          this.selectList.splice(this.selectList.findIndex(x => x.dataIndexInside === e.dataIndexInside), 1)
+        }
+      }
+      if (this.isShowPath === true) return
       if (e.target === undefined) {
-        this.isShowOverview = true
-        this.isShowNode = false
-        this.isShowEdge = false
         // 切换缩放和中心点
         this.$refs.dagChart.setOption({
           series: [{
             zoom: 1,
           }]
         })
+        this.isShowOverview = true
+        this.isShowNode = false
+        this.isShowEdge = false
+        this.isShowPath = false
       }
     },
     EdgeShowEvent (e) {
+      if (this.isShowPath === true) return
       this.isShowEdge = true
       this.isShowOverview = false
       this.isShowNode = false
+      this.isShowPath = false
     },
     NodeShowEvent (e) {
-      this.isShowNode = true
-      this.isShowOverview = false
-      this.isShowEdge = false
-      // 处理多选节点
-      this.CheckSelectedList(e)
       // 处理缩放
       // 设置选中状态
       this.$refs.dagChart.dispatchAction({
@@ -352,8 +348,14 @@ export default {
         seriesIndex: e.seriesIndex,
         dataIndex: e.dataIndex
       })
+      // 添加/移除选中列表
+      // 判断是否在列表中
+      console.log(e)
+      if (this.selectList.find(x => x === e) === undefined && e.type === 'select') { // 如果不在，则添加进列表
+        this.selectList.push(e)
+      }
+
       var nodeData = this.$refs.dagChart.getOption().series[e.seriesIndex].data[e.dataIndexInside]
-      console.log(nodeData)
       // 处理缩放
       var selectedNodeX = nodeData.x
       var selectedNodeY = nodeData.y
@@ -369,19 +371,67 @@ export default {
           zoom: 5
         }]
       })
+      // console.log(this.selectList)
+      if (this.isShowPath === true) return
+      this.isShowNode = true
+      this.isShowOverview = false
+      this.isShowEdge = false
+      this.isShowPath = false
     },
-    CheckSelectedList (e) {
-      // 添加/移除选中列表
-      // 判断是否在列表中
-      if (this.selectList.find(x => x === e) === undefined) { // 如果不在，则添加进列表
-        this.selectList.push(e)
-      } else { // 否则，移出列表
-        this.selectList.pop(e)
-      }
-      // 进行选中列表的合法性检查
-      this.selectList.find(x => x.dataIndexInside === 0)
+    PathShowEvent () {
+      console.log('我触发了')
+      this.isShowPath = true
+      this.isShowNode = false
+      this.isShowOverview = false
+      this.isShowEdge = false
+    },
+    ClearSelectedEvent () {
+      this.selectList.forEach(e => {
+        this.$refs.dagChart.dispatchAction({
+          type: 'unselect',
+          seriesIndex: 0,
+          dataIndex: e.dataIndexInside
+        })
+      })
+      this.selectList = []
+      this.isClearSelected = false
+    },
+    CheckSelectedList () {
       // 如果合法，则在右侧展示路径信息
-      console.log(this.selectList)
+      if (this.CheckPath(0) === true) {
+        this.PathShowEvent()
+      } else {
+        this.isShowPath = false
+        if (!(this.isShowPath || this.isShowNode || this.isShowOverview || this.isShowEdge)) {
+          this.isShowOverview = true
+          // 切换缩放和中心点
+          this.$refs.dagChart.setOption({
+            series: [{
+              zoom: 1,
+            }]
+          })
+        }
+      }
+    },
+    CheckPath (nodeId) {
+      if (this.selectList.find(x => x.dataIndexInside === nodeId)) {
+        if (this.$refs.dagChart.getOption().series[0].data[nodeId].category === 5) {
+          // console.log('this.$refs.dagChart.getOption().series[0].data[nodeId]', this.$refs.dagChart.getOption().series[0].data[nodeId])
+          return true
+        } else {
+          var nextNode
+          processingMapGraph.forEachLinkedNode(nodeId, n => {
+            if (this.selectList.find(x => x.dataIndexInside === n.id)) {
+              nextNode = n.id
+            }
+          }, true)
+          if (nextNode === undefined) return false
+          // console.log('currentNode:', nodeId, 'NextNode:', nextNode)
+          return this.CheckPath(nextNode)
+        }
+      } else {
+        return false
+      }
     }
   }
 }
@@ -395,7 +445,8 @@ export default {
           <vchart class="echart" :option="option" :autoresize="true" ref="dagChart"
                   @select="GraphSelectEvent"
                   @unselect="UnselectEvent"
-                  @zr:click="UnselectEvent">
+                  @zr:click="UnselectEvent"
+                  @zr:dblclick="this.isClearSelected = true">
           </vchart>
         </el-col>
         <el-divider/>
@@ -412,8 +463,24 @@ export default {
       <OverviewComponent v-if="isShowOverview" style="height: 100%;width: 100%"/>
       <NodeInformationComponent v-if="isShowNode" style="height: 100%;width: 100%"/>
       <EdgeInformationComponent v-if="isShowEdge" style="height: 100%;width: 100%"/>
+      <PathInformationComponent v-if="isShowPath" style="height: 100%;width: 100%"/>
     </el-main>
   </el-container>
+  <el-dialog
+    v-model="isClearSelected"
+    title="Tips"
+    width="500"
+  >
+    <span>This is a message</span>
+    <template #footer>
+      <div class="dialog-footer">
+        <el-button @click="isClearSelected = false">Cancel</el-button>
+        <el-button type="primary" @click="ClearSelectedEvent">
+          Confirm
+        </el-button>
+      </div>
+    </template>
+  </el-dialog>
 </template>
 
 <style scoped>

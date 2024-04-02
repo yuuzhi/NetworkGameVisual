@@ -16,7 +16,11 @@ export const mainOption = {
         layout: 'none',
         symbolSize: 20,
         selectedMode: 'multiple',
-        select: {},
+        select: {
+          itemStyle: {
+            color: '#fc5185'
+          }
+        },
         roam: true,
         lineStyle: {
           color: 'source'
