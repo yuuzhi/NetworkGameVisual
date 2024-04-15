@@ -11,7 +11,16 @@ export const sankeyOption = {
     emphasis: {
       focus: 'adjacency'
     },
+    visualMap: {
+      type: 'continuous',
+      min: 0,
+      max: 5,
+      inRange: {
+        color: ['blue', 'red']
+      }
+    },
     data: [],
-    links: []
+    links: [],
+
   }]
 }

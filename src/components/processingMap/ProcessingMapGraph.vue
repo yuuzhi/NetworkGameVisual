@@ -5,11 +5,12 @@ import createGraph from 'ngraph.graph'
 import dagre from 'dagre'
 import { mainOption } from './proecessingMapOptions/mainMapOption'
 import { sankeyOption } from './proecessingMapOptions/sankeyMapOption'
-import ECharts from 'vue-echarts'
+import ECharts, { THEME_KEY } from 'vue-echarts'
 import OverviewComponent from '@/components/processingMap/OverviewComponent.vue'
 import NodeInformationComponent from '@/components/processingMap/NodeInformationComponent.vue'
 import EdgeInformationComponent from '@/components/processingMap/EdgeInformationComponent.vue'
 import PathInformationComponent from '@/components/processingMap/PathInformationComponent.vue'
+import roam from '@/components/processingMap/themes/roma.json'
 
 const nodeType = new Map([[0, 'InteractionPoint'],
   [1, 'Option'],
@@ -28,22 +29,34 @@ const $LogStoreUrl = 'https://baishelog.obs.cn-north-4.myhuaweicloud.com/'
 
 let pointOption = new Map()
 export default {
+  provide: { [THEME_KEY]: 'roam' },
   data () {
     return {
+      // 进度图结构图和数据
       graphMap: null,
       graphData: null,
+      // 可视化选项
       option: mainOption,
       sOption: sankeyOption,
-      sankeyMapState: false,
       userData: [],
+      selectList: [],
       dargeGraph: null,
+      // 数据
+      overViewData: {
+        logNum: 0
+      },
+      // 状态
+      sankeyMapState: false,
       isShowOverview: true,
       isShowNode: false,
       isShowEdge: false,
       isShowSelect: false,
       isShowPath: false,
       isClearSelected: false,
-      selectList: []
+      isLoadingDag: true,
+      isLoadingSankey: true,
+      // 其他
+      theme: roam
     }
   },
   components: {
@@ -72,17 +85,36 @@ export default {
     //   this.graphData = data
     //   // console.log(data)
     // }))
+    console.log(this.$refs.dagChart)
+    console.log(this.$refs.sankeyChart)
+
+    const data = { features: [0.9, 0.9] } // 要发送给后端的数据
+
+    fetch('http://localhost:5000/predict', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(data),
+    })
+      .then(response => response.json())
+      .then(data => {
+        console.log('Prediction:', data.prediction)
+      })
+      .catch(error => {
+        console.error('Error:', error)
+      })
   },
   watch: {
-    graphMap (newVal, oldVal) {
+    graphMap () {
       // console.log('graphMap新值：', newVal)
       this.ReadJsonMakeProcessingGraph()
     },
-    graphData (newVal) {
+    graphData () {
       this.ReadPathMakeProcessingData()
     },
     selectList: {
-      handler (newVal) {
+      handler () {
         // console.log(newVal)
         this.CheckSelectedList(0)
       },
@@ -115,16 +147,22 @@ export default {
 
               var sourceName = nodeType.get(temp1.nodeType) + ' ' + this.graphMap.data.nodes.indexOf(temp1)
               var targetName = nodeType.get(temp2.nodeType) + ' ' + this.graphMap.data.nodes.indexOf(temp2)
-              if (this.sOption.series[0].links.findIndex(
-                l => ((l.source === sourceName) && (l.target === targetName))) > -1) {
+              var offset = pointOption.get(this.GetNodeArrayIndex(log.nodes[nextIndex].nodeType, log.nodes[nextIndex].nodeIndex)).findIndex(i => i === optionIndex)
+              if (offset < 0) offset = 0
+              if (this.sOption.series[0].links.findIndex(l => ((l.source === sourceName) && (l.target === targetName))) > -1) {
                 this.sOption.series[0].links[this.sOption.series[0].links.findIndex(
                   l => ((l.source === sourceName) && (l.target === targetName)
-                  )) + pointOption.get(this.GetNodeArrayIndex(log.nodes[nextIndex].nodeType, log.nodes[nextIndex].nodeIndex)).findIndex(i => i === optionIndex)].value++
+                  )) + offset].value++
+                // this.sOption.series[0].links[this.sOption.series[0].links.findIndex(
+                //   l => ((l.source === sourceName) && (l.target === targetName)
+                //   ))].value++
+                // console.log(sourceName, targetName, pointOption.get(this.GetNodeArrayIndex(log.nodes[nextIndex].nodeType, log.nodes[nextIndex].nodeIndex)).findIndex(i => i === optionIndex))
               }
               break
           }
         })
       })
+      this.isLoadingSankey = false
     }
   },
   methods: {
@@ -269,7 +307,7 @@ export default {
         }
       })
       pointOption = point2OptionMap
-
+      this.isLoadingDag = false
       var currentResult = []
 
       function FindNextInteractionNode (id) {
@@ -438,11 +476,13 @@ export default {
 </script>
 
 <template>
-  <el-container>
+  <el-container style="height: 100%">
     <el-aside width="70%">
       <div style="height: 95%; width:98%">
-        <el-col style="height: 50%">
-          <vchart class="echart" :option="option" :autoresize="true" ref="dagChart"
+        <el-col style="height: 50%" v-loading="isLoadingDag"
+                element-loading-text="Loading..."
+                element-loading-background="rgba(122, 122, 122, 0.3)">
+          <vchart class="echart" :option="option" :theme=theme :autoresize="true" ref="dagChart"
                   @select="GraphSelectEvent"
                   @unselect="UnselectEvent"
                   @zr:click="UnselectEvent"
@@ -450,17 +490,22 @@ export default {
           </vchart>
         </el-col>
         <el-divider/>
-        <el-col style="height: 50%">
-          <vchart class="echart" :option="sOption" :autoresize="true" ref="sankeyChart"
+        <el-col style="height: 50%" v-loading="isLoadingSankey"
+                element-loading-text="Loading..."
+                element-loading-background="rgba(122, 122, 122, 0.3)">
+          <vchart class="echart" :option="sOption" :theme=theme :autoresize="true" ref="sankeyChart"
                   @select="GraphSelectEvent"
                   @unselect="UnselectEvent"
                   @zr:click="UnselectEvent">
           </vchart>
+
         </el-col>
       </div>
     </el-aside>
     <el-main class="rightSide">
-      <OverviewComponent v-if="isShowOverview" style="height: 100%;width: 100%"/>
+      <OverviewComponent v-if="isShowOverview" style="height: 100%;width: 100%"
+                         :graph="graphMap"
+                         :data="userData"/>
       <NodeInformationComponent v-if="isShowNode" style="height: 100%;width: 100%"/>
       <EdgeInformationComponent v-if="isShowEdge" style="height: 100%;width: 100%"/>
       <PathInformationComponent v-if="isShowPath" style="height: 100%;width: 100%"/>
@@ -471,13 +516,13 @@ export default {
     title="Tips"
     width="500"
   >
-    <span>This is a message</span>
+    <span>是否要清除所有选择的结点？</span>
     <template #footer>
       <div class="dialog-footer">
-        <el-button @click="isClearSelected = false">Cancel</el-button>
         <el-button type="primary" @click="ClearSelectedEvent">
-          Confirm
+          确认
         </el-button>
+        <el-button @click="isClearSelected = false">取消</el-button>
       </div>
     </template>
   </el-dialog>

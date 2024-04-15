@@ -6,6 +6,12 @@ export const mainOption = {
     id: 0,
     disabled: false,
   },
+  toolbox: {
+    show: true,
+    feature: {
+      dataView: true
+    }
+  },
   animationDurationUpdate: 1500,
   animationEasingUpdate:
     'quinticInOut',
@@ -32,62 +38,44 @@ export const mainOption = {
           {
             name: '0',
             symbol: 'diamond',
-            itemStyle: {
-              color: '#5470c6'
-            }
           },
           {
             name: '1',
             symbol: 'circle',
-            itemStyle: {
-              color: '#91cc75'
-            }
+            symbolSize: 0,
           },
           {
             name: '2',
             symbol: 'rect',
-            itemStyle: {
-              color: '#fac858'
-            }
+            symbolSize: 0,
           },
           {
             name: '3',
             symbol: 'roundRect',
-            itemStyle: {
-              color: '#ee6666'
-            }
+            symbolSize: 0,
           },
           {
             name: '4',
             symbol: 'roundRect',
-            itemStyle: {
-              color: '#73c0de'
-            }
+            symbolSize: 0,
           },
           {
             name: '5',
             symbol: 'circle',
-            itemStyle: {
-              color: '#3ba272'
-            }
           },
           {
             name: '6',
             symbol: 'roundRect',
-            itemStyle: {
-              color: '#fc8452'
-            }
+            symbolSize: 0,
           },
           {
             name: '7',
             symbol: 'roundRect',
-            itemStyle: {
-              color: '#9a60b4'
-            }
+            symbolSize: 0,
           },
         ],
         edgeSymbol: ['circle', 'arrow'],
-        edgeSymbolSize: [10, 10],
+        edgeSymbolSize: [5, 5],
         edgeLabel: {
           fontSize: 100
         },

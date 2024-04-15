@@ -6,26 +6,7 @@ export const nodeOverviewOption = {
     {
       name: 'Access From',
       type: 'pie',
-      radius: ['40%', '70%'],
-      avoidLabelOverlap: false,
-      padAngle: 5,
-      itemStyle: {
-        borderRadius: 10
-      },
-      label: {
-        show: false,
-        position: 'center'
-      },
-      emphasis: {
-        label: {
-          show: true,
-          fontSize: 40,
-          fontWeight: 'bold'
-        }
-      },
-      labelLine: {
-        show: false
-      },
+      radius: '50%',
       data: [
         {
           value: 1048,
@@ -47,7 +28,14 @@ export const nodeOverviewOption = {
           value: 300,
           name: 'Video Ads'
         }
-      ]
+      ],
+      emphasis: {
+        itemStyle: {
+          shadowBlur: 10,
+          shadowOffsetX: 0,
+          shadowColor: 'rgba(0, 0, 0, 0.5)'
+        }
+      }
     }
   ]
 }

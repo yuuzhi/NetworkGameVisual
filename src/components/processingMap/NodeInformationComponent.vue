@@ -42,7 +42,7 @@ export default {
         <template #header>
           <el-statistic title="Daily active users" :value="268500"></el-statistic>
         </template>
-        <vchart style="height: 310px;width: auto" :option="nodeOverviewOption" ref="vchart"></vchart>
+        <vchart style="height: 20vh;width: auto" :option="nodeOverviewOption" ref="vchart"></vchart>
       </el-card>
     </el-col>
     <el-col :span="12">
@@ -50,7 +50,7 @@ export default {
         <template #header>
           <el-statistic title="Daily active users" :value="268500"></el-statistic>
         </template>
-        <vchart style="height: 310px;width: auto" :option="nodeOverviewOption" ref="vchart"></vchart>
+        <vchart style="height: 20vh;width: auto" :option="nodeOverviewOption" ref="vchart"></vchart>
       </el-card>
     </el-col>
   </el-row>
@@ -60,7 +60,7 @@ export default {
         <template #header>
           <el-statistic title="Daily active users" :value="268500"></el-statistic>
         </template>
-        <vchart style="height: 310px;width: auto" :option="costTimeOption" ref="vchart"></vchart>
+        <vchart style="height: 20vh;width: auto" :option="costTimeOption" ref="vchart"></vchart>
       </el-card>
     </el-col>
   </el-row>
