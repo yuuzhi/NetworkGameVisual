@@ -1,4 +1,4 @@
-export const nodeOverviewOption = {
+export const endOverviewOption = {
   tooltip: {
     trigger: 'item'
   },

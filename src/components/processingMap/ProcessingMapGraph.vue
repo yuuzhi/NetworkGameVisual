@@ -505,7 +505,8 @@ export default {
     <el-main class="rightSide">
       <OverviewComponent v-if="isShowOverview" style="height: 100%;width: 100%"
                          :graph="graphMap"
-                         :data="userData"/>
+                         :graph-data="graphData"
+                         :user-data="userData"/>
       <NodeInformationComponent v-if="isShowNode" style="height: 100%;width: 100%"/>
       <EdgeInformationComponent v-if="isShowEdge" style="height: 100%;width: 100%"/>
       <PathInformationComponent v-if="isShowPath" style="height: 100%;width: 100%"/>

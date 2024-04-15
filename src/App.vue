@@ -1,25 +1,15 @@
 <template>
-  <div class="common-layout" id="app">
-    <el-container style="height: 100%">
-      <el-header>
-        <BaseHeader/>
-      </el-header>
-      <el-container>
-        <div class="aside">
-          <!--          <el-aside>-->
-          <!--            <BaseSide/>-->
-          <!--          </el-aside>-->
-        </div>
-        <el-main class="main">
-          <router-view/>
-        </el-main>
-      </el-container>
+  <div class="common-layout" id="app" style="height: 100%">
+    <el-container>
+      <el-main class="main">
+        <router-view/>
+      </el-main>
     </el-container>
   </div>
 </template>
 <script>
 import BaseHeader from '@/components/layouts/BaseHeader.vue'
-// 解决ERROR ResizeObserver loop completed with undelivered notifications.
+
 const debounce = (fn, delay) => {
   let timer = null
   return function () {
@@ -33,7 +23,6 @@ const debounce = (fn, delay) => {
 }
 
 // 解决ERROR ResizeObserver loop completed with undelivered notifications.
-//问题的
 const _ResizeObserver = window.ResizeObserver
 
 window.ResizeObserver = class ResizeObserver extends _ResizeObserver {
@@ -46,8 +35,6 @@ window.ResizeObserver = class ResizeObserver extends _ResizeObserver {
 export default {
   name: 'App',
   components: {
-    // BaseSide,
-    BaseHeader
   }
 }
 </script>
