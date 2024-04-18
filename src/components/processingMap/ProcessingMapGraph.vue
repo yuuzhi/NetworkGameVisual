@@ -45,6 +45,7 @@ export default {
       overViewData: {
         logNum: 0
       },
+      currentSelectedNode: null,
       // 状态
       sankeyMapState: false,
       isShowOverview: true,
@@ -342,7 +343,23 @@ export default {
       // 切换展示状态
       switch (e.dataType) {
         case 'node':
-          this.NodeShowEvent(e)
+          this.GraphNodeShowEvent(e)
+          this.currentSelectedNode = this.$refs.dagChart.getOption().series[e.seriesIndex].data[e.dataIndexInside].name
+          break
+        case 'edge':
+          this.EdgeShowEvent(e)
+          break
+        default:
+          this.UnselectEvent(e)
+      }
+    },
+    SankeySelectEvent (e) {
+      console.log(e)
+      // 切换展示状态
+      switch (e.dataType) {
+        case 'node':
+          this.SankeyNodeShowEvent(e)
+          this.currentSelectedNode = this.$refs.sankeyChart.getOption().series[e.seriesIndex].data[e.dataIndexInside].name
           break
         case 'edge':
           this.EdgeShowEvent(e)
@@ -378,7 +395,8 @@ export default {
       this.isShowNode = false
       this.isShowPath = false
     },
-    NodeShowEvent (e) {
+    GraphNodeShowEvent (e) {
+      console.log('e:', e)
       // 处理缩放
       // 设置选中状态
       this.$refs.dagChart.dispatchAction({
@@ -388,12 +406,37 @@ export default {
       })
       // 添加/移除选中列表
       // 判断是否在列表中
-      console.log(e)
+      // console.log(e)
       if (this.selectList.find(x => x === e) === undefined && e.type === 'select') { // 如果不在，则添加进列表
         this.selectList.push(e)
       }
 
       var nodeData = this.$refs.dagChart.getOption().series[e.seriesIndex].data[e.dataIndexInside]
+      // 处理缩放
+      var selectedNodeX = nodeData.x
+      var selectedNodeY = nodeData.y
+      // 设置新的视图中心为选中节点的位置
+      this.$refs.dagChart.setOption({
+        series: [{
+          center: [selectedNodeX, selectedNodeY]
+        }]
+      })
+      // 进行放大缩放
+      this.$refs.dagChart.setOption({
+        series: [{
+          zoom: 5
+        }]
+      })
+      // console.log(this.selectList)
+      if (this.isShowPath === true) return
+      this.isShowNode = true
+      this.isShowOverview = false
+      this.isShowEdge = false
+      this.isShowPath = false
+    },
+    SankeyNodeShowEvent (e) {
+      var split = this.$refs.sankeyChart.getOption().series[e.seriesIndex].data[e.dataIndexInside].name.split(' ')
+      var nodeData = this.$refs.dagChart.getOption().series[e.seriesIndex].data[split[1]]
       // 处理缩放
       var selectedNodeX = nodeData.x
       var selectedNodeY = nodeData.y
@@ -470,7 +513,7 @@ export default {
       } else {
         return false
       }
-    }
+    },
   }
 }
 </script>
@@ -479,9 +522,7 @@ export default {
   <el-container style="height: 100%">
     <el-aside width="70%">
       <div style="height: 95%; width:98%">
-        <el-col style="height: 50%" v-loading="isLoadingDag"
-                element-loading-text="Loading..."
-                element-loading-background="rgba(122, 122, 122, 0.3)">
+        <el-col style="height: 50%">
           <vchart class="echart" :option="option" :theme=theme :autoresize="true" ref="dagChart"
                   @select="GraphSelectEvent"
                   @unselect="UnselectEvent"
@@ -490,12 +531,11 @@ export default {
           </vchart>
         </el-col>
         <el-divider/>
-        <el-col style="height: 50%" v-loading="isLoadingSankey"
-                element-loading-text="Loading..."
-                element-loading-background="rgba(122, 122, 122, 0.3)">
+        <el-col style="height: 50%" v-loading.fullscreen.lock="isLoadingSankey"
+                element-loading-text="数据初始化..."
+                element-loading-background="rgba(0, 0, 0, 0.7)">
           <vchart class="echart" :option="sOption" :theme=theme :autoresize="true" ref="sankeyChart"
-                  @select="GraphSelectEvent"
-                  @unselect="UnselectEvent"
+                  @select="SankeySelectEvent"
                   @zr:click="UnselectEvent">
           </vchart>
 
@@ -507,7 +547,12 @@ export default {
                          :graph="graphMap"
                          :graph-data="graphData"
                          :user-data="userData"/>
-      <NodeInformationComponent v-if="isShowNode" style="height: 100%;width: 100%"/>
+      <NodeInformationComponent v-if="isShowNode" style="height: 100%;width: 100%"
+                                :graph="graphMap"
+                                :graph-data="graphData"
+                                :user-data="userData"
+                                :sankeyOption="sOption"
+                                :node-info="currentSelectedNode"/>
       <EdgeInformationComponent v-if="isShowEdge" style="height: 100%;width: 100%"/>
       <PathInformationComponent v-if="isShowPath" style="height: 100%;width: 100%"/>
     </el-main>

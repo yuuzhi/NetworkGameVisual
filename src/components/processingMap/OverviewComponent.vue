@@ -94,6 +94,9 @@ export default {
       // 刷新绘制
       this.$refs.endPieMap.setOption(this.endOverviewOption)
       this.$refs.endCostMap.setOption(this.costTimeOption)
+      // 更新参数
+      this.$store.commit('SetTotalUserCount', this.userData.length)
+      console.log(this.$store.state.totalUserCount)
     }
   },
   methods: {
@@ -117,7 +120,7 @@ export default {
       })
       console.log('结点种类和数量', nodeOverviewOption.series.data)
       this.$refs.nodePieMap.setOption(this.nodeOverviewOption)
-    },
+    }
   }
 }
 </script>
@@ -178,7 +181,7 @@ export default {
     <el-col>
       <el-card>
         <template #header>
-          <el-text>到达各结局平均选择考虑时长</el-text>
+          <el-text>到达各结局平均决策耗时</el-text>
         </template>
         <vchart style="height: 15vh;width: auto" :option="costTimeOption" ref="endCostMap" :autoresize="true"></vchart>
       </el-card>

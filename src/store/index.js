@@ -2,12 +2,12 @@ import { createStore } from 'vuex'
 
 export default createStore({
   state: {
-    sankeyMap: false
+    totalUserCount: 0
   },
   getters: {},
   mutations: {
-    changeSankeyMap (state) {
-      state.sankeyMap = true
+    SetTotalUserCount (state, count) {
+      state.totalUserCount = count
     }
   },
   actions: {},

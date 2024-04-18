@@ -1,18 +1,98 @@
 <script>
 import ECharts from 'vue-echarts'
-import { nodeOverviewOption } from '@/components/processingMap/proecessingMapOptions/Overview/nodeOverviewOption'
-import {
-  costTimeOverviewOption
-} from '@/components/processingMap/proecessingMapOptions/Overview/costTimeOverviewOption'
+import { flowOutNodeOption } from '@/components/processingMap/proecessingMapOptions/Node/flowOutNodeOption'
+import { flowInNodeOption } from '@/components/processingMap/proecessingMapOptions/Node/flowInNodeOption'
+import * as echarts from 'echarts'
+
 export default {
   name: 'NodeInformationComponent',
   components: {
     vchart: ECharts
   },
+  props: {
+    graph: Object,
+    graphData: Object,
+    userData: Array,
+    nodeInfo: String,
+    sankeyOption: Object
+  },
   data () {
     return {
-      nodeOverviewOption: nodeOverviewOption,
-      costTimeOption: costTimeOverviewOption
+      // 数据
+      userCount: 0,
+      costTime: 0,
+      nodeCategory: null,
+      nodeIndex: null,
+      // 配置项
+      flowOutNodeOption: flowOutNodeOption,
+      flowInNodeOption: flowInNodeOption
+    }
+  },
+  mounted () {
+  },
+  watch: {
+    nodeInfo: {
+      handler () {
+        this.nodeCategory = this.nodeInfo.split(' ')[0]
+        this.nodeIndex = this.nodeInfo.split(' ')[1]
+        // 统计数据
+        this.freshStatistic()
+        // 图表数据
+        console.log(this.sankeyOption)
+        // 刷新绘制
+        // this.$refs.flowInChart.setOption(this.flowInNodeOption)
+        // this.$refs.flowOutChart.setOption(this.flowOutNodeOption)
+      },
+      immediate: true
+    },
+    graphData: {
+      handler () {
+
+      },
+      immediate: true
+    },
+
+  },
+  methods: {
+    formatPercentage (value) {
+      return (value * 100).toFixed(2) + '%'
+    },
+    freshStatistic () {
+      var count = 0
+      var totalCostTime = 0
+      this.userData.forEach(log => {
+        log.nodes.forEach(node => {
+          // console.log(node)
+          // 经历到结点的人数
+          if (node.nodeType === this.nodeCategory) {
+            if (node.nodeIndex === this.graph.data.nodes[this.nodeInfo.split(' ')[1]].index) {
+              // console.log(node.nodeIndex === this.graph.data.nodes[this.nodeInfo.split(' ')[1]].index)
+              count++
+            }
+          }
+        })
+        // 到结局的耗时
+        if (this.nodeCategory === 'End') {
+          if (log.nodes[log.nodes.length - 1].nodeIndex === this.graph.data.nodes[this.nodeInfo.split(' ')[1]].index) {
+            log.nodes.forEach(node => {
+              if (node.nodeType === 'InteractionPoint') {
+                totalCostTime += node.costTime
+              }
+            })
+          }
+        }
+        if (this.nodeCategory === 'InteractionPoint') {
+          log.nodes.forEach(node => {
+            if (node.nodeType === 'InteractionPoint' && node.nodeIndex === this.graph.data.nodes[this.nodeInfo.split(' ')[1]].index) {
+              totalCostTime += node.costTime
+            }
+          })
+        }
+      })
+      // 更新数据
+      this.userCount = count
+      // console.log(this.nodeCategory, this.nodeIndex, totalCostTime)
+      this.costTime = totalCostTime / count
     }
   }
 }
@@ -20,19 +100,29 @@ export default {
 
 <template>
   <el-text style="font-size: xxx-large">节点信息</el-text>
+  <el-descriptions border :size="'large'">
+    <el-descriptions-item label="节点类型" label-align="center" align="center">{{ this.nodeCategory }}
+    </el-descriptions-item>
+    <el-descriptions-item label="节点序号" label-align="center" align="center">{{ this.nodeIndex }}
+    </el-descriptions-item>
+  </el-descriptions>
   <el-divider/>
   <el-row style="text-align: center">
-    <el-col :span="6">
-      <el-statistic title="Daily active users" :value="268500"></el-statistic>
+    <el-col :span="8">
+      <el-statistic title="体验人数" :value="userCount">
+        <template #suffix>人</template>
+      </el-statistic>
     </el-col>
-    <el-col :span="6">
-      <el-statistic title="Daily active users" :value="268500"></el-statistic>
+    <el-col :span="8">
+      <el-statistic title="体验人数占比"
+                    :formatter="formatPercentage"
+                    precision="2"
+                    :value="userCount/this.$store.state.totalUserCount"></el-statistic>
     </el-col>
-    <el-col :span="6">
-      <el-statistic title="Daily active users" :value="268500"></el-statistic>
-    </el-col>
-    <el-col :span="6">
-      <el-statistic title="Daily active users" :value="268500"></el-statistic>
+    <el-col :span="8">
+      <el-statistic title="平均决策耗时"
+                    precision="2"
+                    :value="costTime"></el-statistic>
     </el-col>
   </el-row>
   <el-divider/>
@@ -40,17 +130,17 @@ export default {
     <el-col :span="12">
       <el-card>
         <template #header>
-          <el-statistic title="Daily active users" :value="268500"></el-statistic>
+          <el-text>流入分布情况</el-text>
         </template>
-        <vchart style="height: 20vh;width: auto" :option="nodeOverviewOption" ref="vchart"></vchart>
+        <vchart style="height: 20vh;width: auto" :option="flowInNodeOption" ref="flowInChart"></vchart>
       </el-card>
     </el-col>
     <el-col :span="12">
       <el-card>
         <template #header>
-          <el-statistic title="Daily active users" :value="268500"></el-statistic>
+          <el-text>流出分布情况</el-text>
         </template>
-        <vchart style="height: 20vh;width: auto" :option="nodeOverviewOption" ref="vchart"></vchart>
+        <vchart style="height: 20vh;width: auto" :option="flowOutNodeOption" ref="flowOutChart"></vchart>
       </el-card>
     </el-col>
   </el-row>
@@ -58,7 +148,7 @@ export default {
     <el-col>
       <el-card>
         <template #header>
-          <el-statistic title="Daily active users" :value="268500"></el-statistic>
+          <el-text>当前结局下“选择结点权重-决策耗时”散点回归图</el-text>
         </template>
         <vchart style="height: 20vh;width: auto" :option="costTimeOption" ref="vchart"></vchart>
       </el-card>
