@@ -12,9 +12,9 @@ export default {
   props: {
     graph: Object,
     graphData: Object,
+    sankeyOption: Object,
     userData: Array,
-    nodeInfo: String,
-    sankeyOption: Object
+    nodeInfo: String
   },
   data () {
     return {
@@ -39,13 +39,40 @@ export default {
         this.freshStatistic()
         // 图表数据
         console.log(this.sankeyOption)
+        // console.log(this.sankeyOption[0])
+        this.flowInNodeOption.series.data = []
+        this.flowOutNodeOption.series.data = []
+        this.sankeyOption.series[0].links.forEach(link => {
+          if (link.target === this.nodeInfo) {
+            if (this.flowInNodeOption.series.data.find(x => x.name === link.source) === undefined) {
+              this.flowInNodeOption.series.data.push({
+                value: this.sankeyOption.series[0].links.find(x => x.source === link.source && x.target === this.nodeInfo).value,
+                name: link.source
+              })
+            }
+          }
+          if (link.source === this.nodeInfo) {
+            if (this.flowOutNodeOption.series.data.find(x => x.name === link.target) === undefined) {
+              this.flowOutNodeOption.series.data.push({
+                value: this.sankeyOption.series[0].links.find(x => x.target === link.target && x.source === this.nodeInfo).value,
+                name: link.target
+              })
+              console.log(this.sankeyOption.series[0].links.find(x => x.target === link.target && x.source === this.nodeInfo))
+            }
+          }
+        })
+        this.userData.forEach(log => {
+          log.nodes.forEach(node => {
+
+          })
+        })
         // 刷新绘制
         // this.$refs.flowInChart.setOption(this.flowInNodeOption)
         // this.$refs.flowOutChart.setOption(this.flowOutNodeOption)
       },
       immediate: true
     },
-    graphData: {
+    sankeyOption: {
       handler () {
 
       },
@@ -100,6 +127,7 @@ export default {
 
 <template>
   <el-text style="font-size: xxx-large">节点信息</el-text>
+  <el-divider/>
   <el-descriptions border :size="'large'">
     <el-descriptions-item label="节点类型" label-align="center" align="center">{{ this.nodeCategory }}
     </el-descriptions-item>

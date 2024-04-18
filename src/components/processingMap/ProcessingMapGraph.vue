@@ -150,6 +150,7 @@ export default {
               var targetName = nodeType.get(temp2.nodeType) + ' ' + this.graphMap.data.nodes.indexOf(temp2)
               var offset = pointOption.get(this.GetNodeArrayIndex(log.nodes[nextIndex].nodeType, log.nodes[nextIndex].nodeIndex)).findIndex(i => i === optionIndex)
               if (offset < 0) offset = 0
+              //边++
               if (this.sOption.series[0].links.findIndex(l => ((l.source === sourceName) && (l.target === targetName))) > -1) {
                 this.sOption.series[0].links[this.sOption.series[0].links.findIndex(
                   l => ((l.source === sourceName) && (l.target === targetName)
