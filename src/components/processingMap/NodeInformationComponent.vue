@@ -126,7 +126,7 @@ export default {
 </script>
 
 <template>
-  <el-text style="font-size: xxx-large">节点信息</el-text>
+  <el-text style="font-size: xx-large">节点信息</el-text>
   <el-divider/>
   <el-descriptions border :size="'large'">
     <el-descriptions-item label="节点类型" label-align="center" align="center">{{ this.nodeCategory }}
@@ -160,7 +160,7 @@ export default {
         <template #header>
           <el-text>流入分布情况</el-text>
         </template>
-        <vchart style="height: 20vh;width: auto" :option="flowInNodeOption" ref="flowInChart"></vchart>
+        <vchart style="height: 10vh;width: auto" :option="flowInNodeOption" ref="flowInChart"></vchart>
       </el-card>
     </el-col>
     <el-col :span="12">
@@ -168,7 +168,7 @@ export default {
         <template #header>
           <el-text>流出分布情况</el-text>
         </template>
-        <vchart style="height: 20vh;width: auto" :option="flowOutNodeOption" ref="flowOutChart"></vchart>
+        <vchart style="height: 10vh;width: auto" :option="flowOutNodeOption" ref="flowOutChart"></vchart>
       </el-card>
     </el-col>
   </el-row>
@@ -178,7 +178,7 @@ export default {
         <template #header>
           <el-text>当前结局下“选择结点权重-决策耗时”散点回归图</el-text>
         </template>
-        <vchart style="height: 20vh;width: auto" :option="costTimeOption" ref="vchart"></vchart>
+        <vchart style="height: 10vh;width: auto" :option="costTimeOption" ref="vchart"></vchart>
       </el-card>
     </el-col>
   </el-row>

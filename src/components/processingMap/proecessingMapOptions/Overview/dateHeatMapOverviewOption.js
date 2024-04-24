@@ -13,10 +13,13 @@ export const dateHeatMapOverviewOption = {
     left: '10%',
     right: '10%',
     top: '20%',
-    bottom: '20%',
+    bottom: '25%',
     cellSize: ['auto', 'auto'],
     range: '2024',
-    yearLabel: { show: false }
+    yearLabel: { show: false },
+    dayLabel: {
+      fontSize: '8'
+    }
   },
   series: {
     type: 'heatmap',
