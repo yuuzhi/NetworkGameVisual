@@ -2,7 +2,22 @@
 import ECharts from 'vue-echarts'
 import { flowOutNodeOption } from '@/components/processingMap/proecessingMapOptions/Node/flowOutNodeOption'
 import { flowInNodeOption } from '@/components/processingMap/proecessingMapOptions/Node/flowInNodeOption'
+import { scatterLineNodeOption } from '@/components/processingMap/proecessingMapOptions/Node/scatterLineNodeOption'
+import 'ngraph.path'
+import ecStat from 'echarts-stat'
 import * as echarts from 'echarts'
+import createGraph from 'ngraph.graph'
+// import dagre from 'dagre'
+
+const nodeType = new Map([[0, 'InteractionPoint'],
+  [1, 'Option'],
+  [2, 'Input'],
+  [3, 'Fork'],
+  [4, 'Constraints'],
+  [5, 'End'],
+  [6, 'Event'],
+  [7, 'Feedback'],
+  [8, 'Obsolete']])
 
 export default {
   name: 'NodeInformationComponent',
@@ -14,6 +29,7 @@ export default {
     graphData: Object,
     sankeyOption: Object,
     userData: Array,
+    dargeGraph: Object,
     nodeInfo: String
   },
   data () {
@@ -25,7 +41,8 @@ export default {
       nodeIndex: null,
       // 配置项
       flowOutNodeOption: flowOutNodeOption,
-      flowInNodeOption: flowInNodeOption
+      flowInNodeOption: flowInNodeOption,
+      scatterLineNodeOption: scatterLineNodeOption
     }
   },
   mounted () {
@@ -38,34 +55,8 @@ export default {
         // 统计数据
         this.freshStatistic()
         // 图表数据
-        console.log(this.sankeyOption)
-        // console.log(this.sankeyOption[0])
-        this.flowInNodeOption.series.data = []
-        this.flowOutNodeOption.series.data = []
-        this.sankeyOption.series[0].links.forEach(link => {
-          if (link.target === this.nodeInfo) {
-            if (this.flowInNodeOption.series.data.find(x => x.name === link.source) === undefined) {
-              this.flowInNodeOption.series.data.push({
-                value: this.sankeyOption.series[0].links.find(x => x.source === link.source && x.target === this.nodeInfo).value,
-                name: link.source
-              })
-            }
-          }
-          if (link.source === this.nodeInfo) {
-            if (this.flowOutNodeOption.series.data.find(x => x.name === link.target) === undefined) {
-              this.flowOutNodeOption.series.data.push({
-                value: this.sankeyOption.series[0].links.find(x => x.target === link.target && x.source === this.nodeInfo).value,
-                name: link.target
-              })
-              console.log(this.sankeyOption.series[0].links.find(x => x.target === link.target && x.source === this.nodeInfo))
-            }
-          }
-        })
-        this.userData.forEach(log => {
-          log.nodes.forEach(node => {
-
-          })
-        })
+        this.freshPieChart()
+        this.freshScatter()
         // 刷新绘制
         // this.$refs.flowInChart.setOption(this.flowInNodeOption)
         // this.$refs.flowOutChart.setOption(this.flowOutNodeOption)
@@ -84,6 +75,7 @@ export default {
     formatPercentage (value) {
       return (value * 100).toFixed(2) + '%'
     },
+    // 刷新统计数据
     freshStatistic () {
       var count = 0
       var totalCostTime = 0
@@ -120,7 +112,109 @@ export default {
       this.userCount = count
       // console.log(this.nodeCategory, this.nodeIndex, totalCostTime)
       this.costTime = totalCostTime / count
-    }
+    },
+    // 刷新饼状图
+    freshPieChart () {
+      console.log(this.sankeyOption)
+      // console.log(this.sankeyOption[0])
+      this.flowInNodeOption.series.data = []
+      this.flowOutNodeOption.series.data = []
+      this.sankeyOption.series[0].links.forEach(link => {
+        if (link.target === this.nodeInfo) {
+          if (this.flowInNodeOption.series.data.find(x => x.name === link.source) === undefined) {
+            this.flowInNodeOption.series.data.push({
+              value: this.sankeyOption.series[0].links.find(x => x.source === link.source && x.target === this.nodeInfo).value,
+              name: link.source
+            })
+          }
+        }
+        if (link.source === this.nodeInfo) {
+          if (this.flowOutNodeOption.series.data.find(x => x.name === link.target) === undefined) {
+            this.flowOutNodeOption.series.data.push({
+              value: this.sankeyOption.series[0].links.find(x => x.target === link.target && x.source === this.nodeInfo).value,
+              name: link.target
+            })
+            console.log(this.sankeyOption.series[0].links.find(x => x.target === link.target && x.source === this.nodeInfo))
+          }
+        }
+      })
+    },
+    // 散点图
+    freshScatter () {
+      console.log('this.InteractionNodeWeight:', this.InteractionNodeWeight)
+      this.scatterLineNodeOption.series[0].data = []
+      this.scatterLineNodeOption.series[1].data = []
+      if (this.nodeCategory === 'End') {
+        this.userData.forEach(log => {
+          log.nodes.forEach(node => {
+            if (node.nodeType === 'InteractionPoint') {
+              var graphNodeIndex = this.graph.data.nodes.findIndex(x => node.nodeType === nodeType.get(x.nodeType) && x.index === node.nodeIndex)
+              var name = node.nodeType + ' ' + graphNodeIndex
+              this.scatterLineNodeOption.series[0].data.push([this.InteractionNodeWeight.get(name), node.costTime])
+            }
+          })
+        })
+      }
+      console.log(this.scatterLineNodeOption.series[0].data)
+      var temp=[]
+      this.scatterLineNodeOption.series[0].data.forEach(data=>{
+        if (temp.)
+      })
+      this.scatterLineNodeOption.series[1].data.push([])
+    },
+  },
+  computed: {
+    InteractionNodeWeight () { // 获取当前情况下交互点的权重
+      const sankeyGraph = createGraph()
+      this.sankeyOption.series[0].data.forEach(node => {
+        sankeyGraph.addNode(this.sankeyOption.series[0].data.findIndex(x => x === node), node.name)
+      })
+      this.sankeyOption.series[0].links.forEach(link => {
+        sankeyGraph.addLink(this.sankeyOption.series[0].data.findIndex(x => x.name === link.source),
+          this.sankeyOption.series[0].data.findIndex(x => x.name === link.target))
+      })
+      var path = require('ngraph.path')
+      var pathFinder = path.aStar(sankeyGraph) // graph is https://github.com/anvaka/ngraph.graph
+      if (this.nodeCategory === 'End') {
+        // console.log(this.graph.data.nodes)
+        var resultpath = []
+        this.sankeyOption.series[0].data.forEach(node => {
+          var type = node.name.split(' ')[0]
+          var index = this.sankeyOption.series[0].data.findIndex(x => x === node)
+          if (type === 'InteractionPoint') {
+            resultpath.push(pathFinder.find(index, this.sankeyOption.series[0].data.findIndex(x => x.name === this.nodeInfo)))
+          }
+        })
+        var res = new Map()
+        resultpath.forEach(path => {
+          res.set(path[path.length - 1].data, 1 / (path.length - 1))
+        })
+        console.log(res)
+        return res
+        // now we can find a path between two nodes:
+      }
+      // return undefined
+    },
+    // InteractionNodeCostTime () {
+    //   var userCountMap = new Map()
+    //   var totalCostTimeMap = new Map()
+    //   this.sankeyOption.series[0].data.forEach(node => {
+    //     userCountMap.set(node.name, 0)
+    //     totalCostTimeMap.set(node.name, 0)
+    //   })
+    //   this.userData.forEach(log => {
+    //     log.nodes.forEach(node => {
+    //       if (node.nodeType === 'End' || node.nodeType === 'InteractionPoint') {
+    //         var graphNodeIndex = this.graph.data.nodes.findIndex(x => node.nodeType === nodeType.get(x.nodeType) && x.index === node.nodeIndex)
+    //         var name = node.nodeType + ' ' + graphNodeIndex
+    //         if (userCountMap.has(name)) {
+    //           userCountMap.set(name, userCountMap.get(name) + 1)
+    //         }
+    //       }
+    //     })
+    //   })
+    //   console.log(userCountMap)
+    // }
   }
 }
 </script>
@@ -178,7 +272,7 @@ export default {
         <template #header>
           <el-text>当前结局下“选择结点权重-决策耗时”散点回归图</el-text>
         </template>
-        <vchart style="height: 20vh;width: auto" :option="costTimeOption" ref="vchart"></vchart>
+        <vchart style="height: 20vh;width: auto" :option="scatterLineNodeOption" ref="vchart"></vchart>
       </el-card>
     </el-col>
   </el-row>
