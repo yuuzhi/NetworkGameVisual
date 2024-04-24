@@ -27,7 +27,6 @@ export const scatterLineNodeOption = {
     splitLine: {
       lineStyle: {
         type: 'dashed',
-        show: true
       }
     }
   },
@@ -43,23 +42,12 @@ export const scatterLineNodeOption = {
       type: 'boxplot',
       data: [],
       z: 0,
-      borderColor: '#5470c6'
     },
     {
       name: 'line',
       type: 'line',
-      smooth: true,
-      symbolSize: 0.1,
-      symbol: 'circle',
-      label: {
-        show: true,
-        fontSize: 16
-      },
-      labelLayout: { dx: -20 },
-      encode: {
-        label: 2,
-        tooltip: 1
-      }
+      data: [],
+      showSymbol: false
     }
   ]
 }

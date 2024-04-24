@@ -10,6 +10,7 @@ import './assets/css/all.css'
 import ngraph from 'ngraph.graph'
 import roam from './components/processingMap/themes/roma.json'
 import axios from 'axios'
+import ecStat from 'echarts-stat'
 
 require('echarts/lib/component/visualMap')
 

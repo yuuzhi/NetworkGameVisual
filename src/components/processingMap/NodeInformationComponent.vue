@@ -144,6 +144,7 @@ export default {
       console.log('this.InteractionNodeWeight:', this.InteractionNodeWeight)
       this.scatterLineNodeOption.series[0].data = []
       this.scatterLineNodeOption.series[1].data = []
+      this.scatterLineNodeOption.series[2].data = []
       if (this.nodeCategory === 'End') {
         this.userData.forEach(log => {
           log.nodes.forEach(node => {
@@ -178,6 +179,19 @@ export default {
           ecStat.statistics.max(set[1])])
       })
       this.scatterLineNodeOption.xAxis.data = categories
+      // 设置回归的参数
+      const regressionData = []
+      this.scatterLineNodeOption.series[1].data.forEach(data => {
+        // 添加中位数
+        regressionData.push([Number(categories[this.scatterLineNodeOption.series[1].data.findIndex(x => x === data)]), data[2]])
+      })
+
+      const myRegression = ecStat.regression('linear', regressionData, null)
+      console.log(' myRegression', myRegression)
+      myRegression.points.forEach(point => {
+        this.scatterLineNodeOption.series[2].data.push(point[1])
+      })
+      // 重新绘制
       console.log(this.scatterLineNodeOption)
       this.$nextTick(() => {
         this.$refs.scatterLineChart.setOption(this.scatterLineNodeOption)
