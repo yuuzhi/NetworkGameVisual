@@ -1,21 +1,33 @@
 export const scatterLineNodeOption = {
   tooltip: {
-    trigger: 'axis',
+    // trigger: 'axis',
     axisPointer: {
       type: 'cross'
     }
   },
+  grid: {
+    left: '5%',
+    right: '5%',
+    bottom: '5%',
+    top: '5%',
+    containLabel: true
+  },
   xAxis: {
+    type: 'category',
+    data: [],
     splitLine: {
       lineStyle: {
-        type: 'dashed'
+        type: 'dashed',
+        show: true
       }
     }
   },
   yAxis: {
+    type: 'value',
     splitLine: {
       lineStyle: {
-        type: 'dashed'
+        type: 'dashed',
+        show: true
       }
     }
   },
@@ -24,12 +36,14 @@ export const scatterLineNodeOption = {
       name: 'scatter',
       type: 'scatter',
       data: [],
-      symbolSize: 5
+      symbolSize: 5,
     },
     {
       name: 'boxplot',
       type: 'boxplot',
-      data: []
+      data: [],
+      z: 0,
+      borderColor: '#5470c6'
     },
     {
       name: 'line',

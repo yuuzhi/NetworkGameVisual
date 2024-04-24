@@ -150,7 +150,7 @@ export default {
               var targetName = nodeType.get(temp2.nodeType) + ' ' + this.graphMap.data.nodes.indexOf(temp2)
               var offset = pointOption.get(this.GetNodeArrayIndex(log.nodes[nextIndex].nodeType, log.nodes[nextIndex].nodeIndex)).findIndex(i => i === optionIndex)
               if (offset < 0) offset = 0
-              //边++
+              // 边++
               if (this.sOption.series[0].links.findIndex(l => ((l.source === sourceName) && (l.target === targetName))) > -1) {
                 this.sOption.series[0].links[this.sOption.series[0].links.findIndex(
                   l => ((l.source === sourceName) && (l.target === targetName)
@@ -174,12 +174,12 @@ export default {
 
       axios.get($LogStoreUrl + basePath)
         .then(async (response) => {
-          var dom = new DOMParser()
-          var res = dom.parseFromString(response.data, 'text/xml')
+          const dom = new DOMParser()
+          const res = dom.parseFromString(response.data, 'text/xml')
           const fileNames = res.getElementsByTagName('Contents')
           for (const fileName of fileNames) {
             if (fileName.getElementsByTagName('Key')[0].innerHTML.endsWith('.json')) {
-              var name = fileName.getElementsByTagName('Key')[0].innerHTML
+              const name = fileName.getElementsByTagName('Key')[0].innerHTML
               const jsonFileResponse = await axios.get($LogStoreUrl + basePath + name)
               userDataTemp.push(jsonFileResponse.data)
             }
@@ -279,10 +279,10 @@ export default {
       processingMapGraph.forEachNode(node => {
         if (node.data.nodeType === 0 || node.data.nodeType === 5) {
           processingMapGraph.forEachLinkedNode(node.id, n => {
-            var tempOption = []
+            const tempOption = []
             currentResult = []
             FindNextInteractionNode(n.id)
-            var nextNode = currentResult
+            const nextNode = currentResult
             if (nextNode !== null) {
               nextNode.forEach(nextNode => {
                 // 把边塞进桑基图
@@ -297,7 +297,7 @@ export default {
                 tempOption.push(n.id)
                 // 配置Map
                 if (point2OptionMap.has(nextNode.id)) {
-                  var array = point2OptionMap.get(nextNode.id)
+                  const array = point2OptionMap.get(nextNode.id)
                   array.push(n.id)
                   point2OptionMap.set(nextNode.id, array)
                 } else {
@@ -412,10 +412,10 @@ export default {
         this.selectList.push(e)
       }
 
-      var nodeData = this.$refs.dagChart.getOption().series[e.seriesIndex].data[e.dataIndexInside]
+      const nodeData = this.$refs.dagChart.getOption().series[e.seriesIndex].data[e.dataIndexInside]
       // 处理缩放
-      var selectedNodeX = nodeData.x
-      var selectedNodeY = nodeData.y
+      const selectedNodeX = nodeData.x
+      const selectedNodeY = nodeData.y
       // 设置新的视图中心为选中节点的位置
       this.$refs.dagChart.setOption({
         series: [{
@@ -436,11 +436,11 @@ export default {
       this.isShowPath = false
     },
     SankeyNodeShowEvent (e) {
-      var split = this.$refs.sankeyChart.getOption().series[e.seriesIndex].data[e.dataIndexInside].name.split(' ')
-      var nodeData = this.$refs.dagChart.getOption().series[e.seriesIndex].data[split[1]]
+      const split = this.$refs.sankeyChart.getOption().series[e.seriesIndex].data[e.dataIndexInside].name.split(' ')
+      const nodeData = this.$refs.dagChart.getOption().series[e.seriesIndex].data[split[1]]
       // 处理缩放
-      var selectedNodeX = nodeData.x
-      var selectedNodeY = nodeData.y
+      const selectedNodeX = nodeData.x
+      const selectedNodeY = nodeData.y
       // 设置新的视图中心为选中节点的位置
       this.$refs.dagChart.setOption({
         series: [{
@@ -501,7 +501,7 @@ export default {
           // console.log('this.$refs.dagChart.getOption().series[0].data[nodeId]', this.$refs.dagChart.getOption().series[0].data[nodeId])
           return true
         } else {
-          var nextNode
+          let nextNode
           processingMapGraph.forEachLinkedNode(nodeId, n => {
             if (this.selectList.find(x => x.dataIndexInside === n.id)) {
               nextNode = n.id
@@ -522,7 +522,7 @@ export default {
 <template>
   <el-container style="height: 100%">
     <el-aside width="70%">
-      <div style="height: 95%; width:98%">
+      <div style="height: 94%; width:98%">
         <el-col style="height: 50%">
           <vchart class="echart" :option="option" :theme=theme :autoresize="true" ref="dagChart"
                   @select="GraphSelectEvent"
@@ -586,5 +586,6 @@ export default {
 .rightSide {
   border: gray solid 1px;
   border-radius: 10px;
+  height: 870px;
 }
 </style>

@@ -12,11 +12,14 @@ export const dateHeatMapOverviewOption = {
   calendar: {
     left: '10%',
     right: '10%',
-    top: '20%',
-    bottom: '20%',
+    top: '0%',
+    bottom: '30%',
     cellSize: ['auto', 'auto'],
     range: '2024',
-    yearLabel: { show: false }
+    yearLabel: { show: false },
+    dayLabel: {
+      fontSize: 8
+    }
   },
   series: {
     type: 'heatmap',

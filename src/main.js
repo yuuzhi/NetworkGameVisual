@@ -23,6 +23,6 @@ app.use(store)
 // .use(echarts)
 app.config.globalProperties.$echarts = echarts
 app.component('vchart', VCharts)
-echarts.registerTheme('roam', roam)
+// echarts.registerTheme('roam', roam)
 app.config.globalProperties.$axios = axios
 app.mount('#app')

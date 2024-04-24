@@ -77,8 +77,8 @@ export default {
     },
     // 刷新统计数据
     freshStatistic () {
-      var count = 0
-      var totalCostTime = 0
+      let count = 0
+      let totalCostTime = 0
       this.userData.forEach(log => {
         log.nodes.forEach(node => {
           // console.log(node)
@@ -148,19 +148,40 @@ export default {
         this.userData.forEach(log => {
           log.nodes.forEach(node => {
             if (node.nodeType === 'InteractionPoint') {
-              var graphNodeIndex = this.graph.data.nodes.findIndex(x => node.nodeType === nodeType.get(x.nodeType) && x.index === node.nodeIndex)
-              var name = node.nodeType + ' ' + graphNodeIndex
+              const graphNodeIndex = this.graph.data.nodes.findIndex(x => node.nodeType === nodeType.get(x.nodeType) && x.index === node.nodeIndex)
+              const name = node.nodeType + ' ' + graphNodeIndex
               this.scatterLineNodeOption.series[0].data.push([this.InteractionNodeWeight.get(name), node.costTime])
             }
           })
         })
       }
-      console.log(this.scatterLineNodeOption.series[0].data)
-      var temp=[]
-      this.scatterLineNodeOption.series[0].data.forEach(data=>{
-        if (temp.)
+      // console.log(this.scatterLineNodeOption.series[0].data)
+      // 盒须图预处理
+      const temp = []
+      this.scatterLineNodeOption.series[0].data.forEach(data => {
+        if (temp.find(x => x[0] === data[0])) {
+          temp[temp.findIndex(x => x[0] === data[0])][1].push(data[1])
+        } else {
+          temp.push([data[0], []])
+          temp[temp.findIndex(x => x[0] === data[0])][1].push(data[1])
+        }
       })
-      this.scatterLineNodeOption.series[1].data.push([])
+      console.log(temp)
+      // 设置option的categories
+      const categories = []
+      temp.forEach(set => {
+        categories.push(set[0])
+        this.scatterLineNodeOption.series[1].data.push([ecStat.statistics.min(set[1]),
+          ecStat.statistics.quantile(set[1], 0.25),
+          ecStat.statistics.quantile(set[1], 0.5),
+          ecStat.statistics.quantile(set[1], 0.75),
+          ecStat.statistics.max(set[1])])
+      })
+      this.scatterLineNodeOption.xAxis.data = categories
+      console.log(this.scatterLineNodeOption)
+      this.$nextTick(() => {
+        this.$refs.scatterLineChart.setOption(this.scatterLineNodeOption)
+      })
     },
   },
   computed: {
@@ -173,21 +194,21 @@ export default {
         sankeyGraph.addLink(this.sankeyOption.series[0].data.findIndex(x => x.name === link.source),
           this.sankeyOption.series[0].data.findIndex(x => x.name === link.target))
       })
-      var path = require('ngraph.path')
-      var pathFinder = path.aStar(sankeyGraph) // graph is https://github.com/anvaka/ngraph.graph
+      const path = require('ngraph.path')
+      const pathFinder = path.aStar(sankeyGraph) // graph is https://github.com/anvaka/ngraph.graph
       if (this.nodeCategory === 'End') {
         // console.log(this.graph.data.nodes)
-        var resultpath = []
+        const resultpath = []
         this.sankeyOption.series[0].data.forEach(node => {
-          var type = node.name.split(' ')[0]
-          var index = this.sankeyOption.series[0].data.findIndex(x => x === node)
+          const type = node.name.split(' ')[0]
+          const index = this.sankeyOption.series[0].data.findIndex(x => x === node)
           if (type === 'InteractionPoint') {
             resultpath.push(pathFinder.find(index, this.sankeyOption.series[0].data.findIndex(x => x.name === this.nodeInfo)))
           }
         })
-        var res = new Map()
+        const res = new Map()
         resultpath.forEach(path => {
-          res.set(path[path.length - 1].data, 1 / (path.length - 1))
+          res.set(path[path.length - 1].data, (1 / (path.length - 1)).toFixed(2))
         })
         console.log(res)
         return res
@@ -220,7 +241,7 @@ export default {
 </script>
 
 <template>
-  <el-text style="font-size: xxx-large">节点信息</el-text>
+  <el-text style="font-size: xx-large">节点信息</el-text>
   <el-divider/>
   <el-descriptions border :size="'large'">
     <el-descriptions-item label="节点类型" label-align="center" align="center">{{ this.nodeCategory }}
@@ -254,7 +275,7 @@ export default {
         <template #header>
           <el-text>流入分布情况</el-text>
         </template>
-        <vchart style="height: 20vh;width: auto" :option="flowInNodeOption" ref="flowInChart"></vchart>
+        <vchart style="height: 15vh;width: auto" :option="flowInNodeOption" ref="flowInChart" :autoresize="true"></vchart>
       </el-card>
     </el-col>
     <el-col :span="12">
@@ -262,7 +283,7 @@ export default {
         <template #header>
           <el-text>流出分布情况</el-text>
         </template>
-        <vchart style="height: 20vh;width: auto" :option="flowOutNodeOption" ref="flowOutChart"></vchart>
+        <vchart style="height: 15vh;width: auto" :option="flowOutNodeOption" ref="flowOutChart" :autoresize="true"></vchart>
       </el-card>
     </el-col>
   </el-row>
@@ -272,7 +293,7 @@ export default {
         <template #header>
           <el-text>当前结局下“选择结点权重-决策耗时”散点回归图</el-text>
         </template>
-        <vchart style="height: 20vh;width: auto" :option="scatterLineNodeOption" ref="vchart"></vchart>
+        <vchart style="height: 15vh;width: auto" :option="scatterLineNodeOption" ref="scatterLineChart" :autoresize="true"></vchart>
       </el-card>
     </el-col>
   </el-row>

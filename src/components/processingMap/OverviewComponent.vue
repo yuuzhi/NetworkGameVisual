@@ -76,7 +76,7 @@ export default {
           }
         })
         // 热力图
-        var day = echarts.format.formatTime('yyyy-MM-dd', log.logID * 1000)
+        const day = echarts.format.formatTime('yyyy-MM-dd', log.logID * 1000)
         if (this.dateHeatMapOption.series.data.find(x => x[0] === day) !== undefined) {
           this.dateHeatMapOption.series.data.find(x => x[0] === day)[1]++
         } else {
@@ -87,7 +87,7 @@ export default {
       this.dateHeatMapOption.visualMap.max = this.GetDateMaxNum()
       // 平均时长求值
       this.costTimeOption.series[0].data.forEach(e => {
-        var index = this.costTimeOption.series[0].data.findIndex(x => x === e)
+        const index = this.costTimeOption.series[0].data.findIndex(x => x === e)
         this.costTimeOption.series[0].data[index] /= this.endOverviewOption.series.data.find(x => x.name ===
           this.costTimeOption.xAxis[0].data[index]).value
       })
@@ -101,7 +101,7 @@ export default {
   },
   methods: {
     GetDateMaxNum () {
-      var dataMax = 0
+      let dataMax = 0
       this.dateHeatMapOption.series.data.forEach(e => {
         if (e[1] > dataMax) dataMax = e[1]
       })
@@ -126,7 +126,7 @@ export default {
 </script>
 
 <template>
-  <el-text style="font-size: xxx-large">总览</el-text>
+  <el-text style="font-size: xx-large">总览</el-text>
   <el-divider/>
   <el-row style="text-align: center">
     <el-col :span="8">
@@ -152,7 +152,7 @@ export default {
         <template #header>
           <el-text>玩家体验日期分布情况</el-text>
         </template>
-        <vchart style="height: 15vh;width: auto" :option="dateHeatMapOption" ref="dateHeatMapChart"
+        <vchart style="height: 10vh;width: auto" :option="dateHeatMapOption" ref="dateHeatMapChart"
                 :autoresize="true"></vchart>
       </el-card>
     </el-col>
@@ -163,7 +163,7 @@ export default {
         <template #header>
           <el-text>叙事节点类别分布情况</el-text>
         </template>
-        <vchart style="height: 15vh;width: auto" :option="nodeOverviewOption" ref="nodePieMap"
+        <vchart style="height: 10vh;width: auto" :option="nodeOverviewOption" ref="nodePieMap"
                 :autoresize="true"></vchart>
       </el-card>
     </el-col>
@@ -172,7 +172,7 @@ export default {
         <template #header>
           <el-text>用户结局体验分布情况</el-text>
         </template>
-        <vchart style="height: 15vh;width: auto" :option="endOverviewOption" ref="endPieMap"
+        <vchart style="height: 10vh;width: auto" :option="endOverviewOption" ref="endPieMap"
                 :autoresize="true"></vchart>
       </el-card>
     </el-col>
@@ -183,7 +183,7 @@ export default {
         <template #header>
           <el-text>到达各结局平均决策耗时</el-text>
         </template>
-        <vchart style="height: 15vh;width: auto" :option="costTimeOption" ref="endCostMap" :autoresize="true"></vchart>
+        <vchart style="height: 10vh;width: auto" :option="costTimeOption" ref="endCostMap" :autoresize="true"></vchart>
       </el-card>
     </el-col>
   </el-row>
