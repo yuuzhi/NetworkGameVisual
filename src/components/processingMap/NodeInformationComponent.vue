@@ -3,6 +3,7 @@ import ECharts from 'vue-echarts'
 import { flowOutNodeOption } from '@/components/processingMap/proecessingMapOptions/Node/flowOutNodeOption'
 import { flowInNodeOption } from '@/components/processingMap/proecessingMapOptions/Node/flowInNodeOption'
 import { scatterLineNodeOption } from '@/components/processingMap/proecessingMapOptions/Node/scatterLineNodeOption'
+import { parallelAxisNodeOption } from '@/components/processingMap/proecessingMapOptions/Node/parallelAxisNodeOption'
 import 'ngraph.path'
 import ecStat from 'echarts-stat'
 import * as echarts from 'echarts'
@@ -42,7 +43,11 @@ export default {
       // 配置项
       flowOutNodeOption: flowOutNodeOption,
       flowInNodeOption: flowInNodeOption,
-      scatterLineNodeOption: scatterLineNodeOption
+      scatterLineNodeOption: scatterLineNodeOption,
+      parallelAxisNodeOption: parallelAxisNodeOption,
+      // 状态
+      isEndNode: false,
+      isIPNode: false
     }
   },
   mounted () {
@@ -52,6 +57,8 @@ export default {
       handler () {
         this.nodeCategory = this.nodeInfo.split(' ')[0]
         this.nodeIndex = this.nodeInfo.split(' ')[1]
+        // 设置状态
+        this.changeState()
         // 统计数据
         this.freshStatistic()
         // 图表数据
@@ -74,6 +81,20 @@ export default {
   methods: {
     formatPercentage (value) {
       return (value * 100).toFixed(2) + '%'
+    },
+    changeState () {
+      this.isEndNode = false
+      this.isIPNode = false
+      switch (this.nodeCategory) {
+        case 'End':
+          this.isEndNode = true
+          break
+        case 'InteractionPoint':
+          this.isIPNode = true
+          break
+        default:
+          break
+      }
     },
     // 刷新统计数据
     freshStatistic () {
@@ -155,47 +176,50 @@ export default {
             }
           })
         })
-      }
-      // console.log(this.scatterLineNodeOption.series[0].data)
-      // 盒须图预处理
-      const temp = []
-      this.scatterLineNodeOption.series[0].data.forEach(data => {
-        if (temp.find(x => x[0] === data[0])) {
-          temp[temp.findIndex(x => x[0] === data[0])][1].push(data[1])
-        } else {
-          temp.push([data[0], []])
-          temp[temp.findIndex(x => x[0] === data[0])][1].push(data[1])
-        }
-      })
-      console.log(temp)
-      // 设置option的categories
-      const categories = []
-      temp.forEach(set => {
-        categories.push(set[0])
-        this.scatterLineNodeOption.series[1].data.push([ecStat.statistics.min(set[1]),
-          ecStat.statistics.quantile(set[1], 0.25),
-          ecStat.statistics.quantile(set[1], 0.5),
-          ecStat.statistics.quantile(set[1], 0.75),
-          ecStat.statistics.max(set[1])])
-      })
-      this.scatterLineNodeOption.xAxis.data = categories
-      // 设置回归的参数
-      const regressionData = []
-      this.scatterLineNodeOption.series[1].data.forEach(data => {
-        // 添加中位数
-        regressionData.push([Number(categories[this.scatterLineNodeOption.series[1].data.findIndex(x => x === data)]), data[2]])
-      })
+        // console.log(this.scatterLineNodeOption.series[0].data)
+        // 盒须图预处理
+        const temp = []
+        this.scatterLineNodeOption.series[0].data.forEach(data => {
+          if (temp.find(x => x[0] === data[0])) {
+            temp[temp.findIndex(x => x[0] === data[0])][1].push(data[1])
+          } else {
+            temp.push([data[0], []])
+            temp[temp.findIndex(x => x[0] === data[0])][1].push(data[1])
+          }
+        })
+        console.log(temp)
+        // 设置option的categories
+        const categories = []
+        temp.forEach(set => {
+          categories.push(set[0])
+          this.scatterLineNodeOption.series[1].data.push([ecStat.statistics.min(set[1]),
+            ecStat.statistics.quantile(set[1], 0.25),
+            ecStat.statistics.quantile(set[1], 0.5),
+            ecStat.statistics.quantile(set[1], 0.75),
+            ecStat.statistics.max(set[1])])
+        })
+        this.scatterLineNodeOption.xAxis.data = categories
+        // 设置回归的参数
+        const regressionData = []
+        this.scatterLineNodeOption.series[1].data.forEach(data => {
+          // 添加中位数
+          regressionData.push([Number(categories[this.scatterLineNodeOption.series[1].data.findIndex(x => x === data)]), data[2]])
+        })
 
-      const myRegression = ecStat.regression('linear', regressionData, null)
-      console.log(' myRegression', myRegression)
-      myRegression.points.forEach(point => {
-        this.scatterLineNodeOption.series[2].data.push(point[1])
-      })
-      // 重新绘制
-      console.log(this.scatterLineNodeOption)
-      this.$nextTick(() => {
-        this.$refs.scatterLineChart.setOption(this.scatterLineNodeOption)
-      })
+        const myRegression = ecStat.regression('linear', regressionData, null)
+        console.log(' myRegression', myRegression)
+        myRegression.points.forEach(point => {
+          this.scatterLineNodeOption.series[2].data.push(point[1])
+        })
+        // 重新绘制
+        console.log(this.scatterLineNodeOption)
+        this.$nextTick(() => {
+          this.$refs.scatterLineChart.setOption(this.scatterLineNodeOption)
+        })
+      }
+      if (this.nodeCategory === 'InteractionPoint') {
+
+      }
     },
   },
   computed: {
@@ -228,28 +252,8 @@ export default {
         return res
         // now we can find a path between two nodes:
       }
-      // return undefined
+      return undefined
     },
-    // InteractionNodeCostTime () {
-    //   var userCountMap = new Map()
-    //   var totalCostTimeMap = new Map()
-    //   this.sankeyOption.series[0].data.forEach(node => {
-    //     userCountMap.set(node.name, 0)
-    //     totalCostTimeMap.set(node.name, 0)
-    //   })
-    //   this.userData.forEach(log => {
-    //     log.nodes.forEach(node => {
-    //       if (node.nodeType === 'End' || node.nodeType === 'InteractionPoint') {
-    //         var graphNodeIndex = this.graph.data.nodes.findIndex(x => node.nodeType === nodeType.get(x.nodeType) && x.index === node.nodeIndex)
-    //         var name = node.nodeType + ' ' + graphNodeIndex
-    //         if (userCountMap.has(name)) {
-    //           userCountMap.set(name, userCountMap.get(name) + 1)
-    //         }
-    //       }
-    //     })
-    //   })
-    //   console.log(userCountMap)
-    // }
   }
 }
 </script>
@@ -289,7 +293,8 @@ export default {
         <template #header>
           <el-text>流入分布情况</el-text>
         </template>
-        <vchart style="height: 15vh;width: auto" :option="flowInNodeOption" ref="flowInChart" :autoresize="true"></vchart>
+        <vchart style="height: 15vh;width: auto" :option="flowInNodeOption" ref="flowInChart"
+                :autoresize="true"></vchart>
       </el-card>
     </el-col>
     <el-col :span="12">
@@ -297,17 +302,26 @@ export default {
         <template #header>
           <el-text>流出分布情况</el-text>
         </template>
-        <vchart style="height: 15vh;width: auto" :option="flowOutNodeOption" ref="flowOutChart" :autoresize="true"></vchart>
+        <vchart style="height: 15vh;width: auto" :option="flowOutNodeOption" ref="flowOutChart"
+                :autoresize="true"></vchart>
       </el-card>
     </el-col>
   </el-row>
   <el-row :gutter="20">
     <el-col>
-      <el-card>
+      <el-card v-if="isEndNode">
         <template #header>
           <el-text>当前结局下“选择结点权重-决策耗时”散点回归图</el-text>
         </template>
-        <vchart style="height: 15vh;width: auto" :option="scatterLineNodeOption" ref="scatterLineChart" :autoresize="true"></vchart>
+        <vchart style="height: 15vh;width: auto" :option="scatterLineNodeOption" ref="scatterLineChart"
+                :autoresize="true"></vchart>
+      </el-card>
+      <el-card v-if="isIPNode">
+        <template #header>
+          <el-text>“前一节点-当前节点-后一节点”加权平均耗时的平行坐标图</el-text>
+        </template>
+        <vchart style="height: 15vh;width: auto" :option="parallelAxisNodeOption" ref="parallelAxisChart"
+                :autoresize="true"></vchart>
       </el-card>
     </el-col>
   </el-row>
