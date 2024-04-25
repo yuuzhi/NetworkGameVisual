@@ -16,10 +16,6 @@ export const parallelAxisNodeOption = {
     lineStyle: {
       width: 4
     },
-    data: [
-      [12.99, 100, 82],
-      [9.99, 80, 77],
-      [20, 120, 60]
-    ]
+    data: []
   }
 }

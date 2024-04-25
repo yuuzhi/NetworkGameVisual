@@ -4,10 +4,11 @@ import { flowOutNodeOption } from '@/components/processingMap/proecessingMapOpti
 import { flowInNodeOption } from '@/components/processingMap/proecessingMapOptions/Node/flowInNodeOption'
 import { scatterLineNodeOption } from '@/components/processingMap/proecessingMapOptions/Node/scatterLineNodeOption'
 import { parallelAxisNodeOption } from '@/components/processingMap/proecessingMapOptions/Node/parallelAxisNodeOption'
-import 'ngraph.path'
+import path from 'ngraph.path'
 import ecStat from 'echarts-stat'
 import * as echarts from 'echarts'
 import createGraph from 'ngraph.graph'
+
 // import dagre from 'dagre'
 
 const nodeType = new Map([[0, 'InteractionPoint'],
@@ -64,6 +65,7 @@ export default {
         // 图表数据
         this.freshPieChart()
         this.freshScatter()
+        this.freshParallel()
         // 刷新绘制
         // this.$refs.flowInChart.setOption(this.flowInNodeOption)
         // this.$refs.flowOutChart.setOption(this.flowOutNodeOption)
@@ -100,13 +102,16 @@ export default {
     freshStatistic () {
       let count = 0
       let totalCostTime = 0
+      // TODO
+      // console.log('graphData', this.graph)
+      // console.log('log', this.userData)
       this.userData.forEach(log => {
         log.nodes.forEach(node => {
-          // console.log(node)
+          // // console.log(node)
           // 经历到结点的人数
           if (node.nodeType === this.nodeCategory) {
             if (node.nodeIndex === this.graph.data.nodes[this.nodeInfo.split(' ')[1]].index) {
-              // console.log(node.nodeIndex === this.graph.data.nodes[this.nodeInfo.split(' ')[1]].index)
+              // // console.log(node.nodeIndex === this.graph.data.nodes[this.nodeInfo.split(' ')[1]].index)
               count++
             }
           }
@@ -131,13 +136,13 @@ export default {
       })
       // 更新数据
       this.userCount = count
-      // console.log(this.nodeCategory, this.nodeIndex, totalCostTime)
+      // // console.log(this.nodeCategory, this.nodeIndex, totalCostTime)
       this.costTime = totalCostTime / count
     },
     // 刷新饼状图
     freshPieChart () {
-      console.log(this.sankeyOption)
-      // console.log(this.sankeyOption[0])
+      // console.log(this.sankeyOption)
+      // // console.log(this.sankeyOption[0])
       this.flowInNodeOption.series.data = []
       this.flowOutNodeOption.series.data = []
       this.sankeyOption.series[0].links.forEach(link => {
@@ -155,14 +160,17 @@ export default {
               value: this.sankeyOption.series[0].links.find(x => x.target === link.target && x.source === this.nodeInfo).value,
               name: link.target
             })
-            console.log(this.sankeyOption.series[0].links.find(x => x.target === link.target && x.source === this.nodeInfo))
+            // console.log(this.sankeyOption.series[0].links.find(x => x.target === link.target && x.source === this.nodeInfo))
           }
         }
       })
     },
     // 散点图
     freshScatter () {
-      console.log('this.InteractionNodeWeight:', this.InteractionNodeWeight)
+      if (this.nodeCategory !== 'End') {
+        return undefined
+      }
+      // console.log('this.InteractionNodeWeight:', this.InteractionNodeWeight)
       this.scatterLineNodeOption.series[0].data = []
       this.scatterLineNodeOption.series[1].data = []
       this.scatterLineNodeOption.series[2].data = []
@@ -176,7 +184,7 @@ export default {
             }
           })
         })
-        // console.log(this.scatterLineNodeOption.series[0].data)
+        // // console.log(this.scatterLineNodeOption.series[0].data)
         // 盒须图预处理
         const temp = []
         this.scatterLineNodeOption.series[0].data.forEach(data => {
@@ -187,7 +195,7 @@ export default {
             temp[temp.findIndex(x => x[0] === data[0])][1].push(data[1])
           }
         })
-        console.log(temp)
+        // console.log(temp)
         // 设置option的categories
         const categories = []
         temp.forEach(set => {
@@ -207,23 +215,31 @@ export default {
         })
 
         const myRegression = ecStat.regression('linear', regressionData, null)
-        console.log(' myRegression', myRegression)
+        // console.log(' myRegression', myRegression)
         myRegression.points.forEach(point => {
           this.scatterLineNodeOption.series[2].data.push(point[1])
         })
         // 重新绘制
-        console.log(this.scatterLineNodeOption)
+        // console.log(this.scatterLineNodeOption)
         this.$nextTick(() => {
           this.$refs.scatterLineChart.setOption(this.scatterLineNodeOption)
         })
       }
-      if (this.nodeCategory === 'InteractionPoint') {
-
-      }
     },
+    freshParallel () {
+      const data = this.ParallelData
+      if (data !== undefined) {
+        this.parallelAxisNodeOption.series.data = data
+        console.log(this.scatterLineNodeOption)
+        this.$nextTick(() => {
+          this.$refs.parallelAxisChart.setOption(this.parallelAxisNodeOption)
+        })
+      }
+    }
   },
   computed: {
     InteractionNodeWeight () { // 获取当前情况下交互点的权重
+      // 建图
       const sankeyGraph = createGraph()
       this.sankeyOption.series[0].data.forEach(node => {
         sankeyGraph.addNode(this.sankeyOption.series[0].data.findIndex(x => x === node), node.name)
@@ -234,8 +250,9 @@ export default {
       })
       const path = require('ngraph.path')
       const pathFinder = path.aStar(sankeyGraph) // graph is https://github.com/anvaka/ngraph.graph
+      // 如果当前选中的是End
       if (this.nodeCategory === 'End') {
-        // console.log(this.graph.data.nodes)
+        // // console.log(this.graph.data.nodes)
         const resultpath = []
         this.sankeyOption.series[0].data.forEach(node => {
           const type = node.name.split(' ')[0]
@@ -248,12 +265,85 @@ export default {
         resultpath.forEach(path => {
           res.set(path[path.length - 1].data, (1 / (path.length - 1)).toFixed(2))
         })
-        console.log(res)
+        // console.log(res)
         return res
-        // now we can find a path between two nodes:
       }
       return undefined
     },
+    ParallelData () {
+      if (this.nodeCategory !== 'InteractionPoint') {
+        return undefined
+      }
+      // console.log(this.userData)
+      const res = []
+      // 建图
+      const sankeyGraph = createGraph()
+      this.sankeyOption.series[0].data.forEach(node => {
+        sankeyGraph.addNode(this.sankeyOption.series[0].data.findIndex(x => x === node), node.name)
+      })
+      this.sankeyOption.series[0].links.forEach(link => {
+        sankeyGraph.addLink(this.sankeyOption.series[0].data.findIndex(x => x.name === link.source),
+          this.sankeyOption.series[0].data.findIndex(x => x.name === link.target))
+      })
+      const path = require('ngraph.path')
+      const pathFinder = path.aStar(sankeyGraph) // graph is https://github.com/anvaka/ngraph.graph
+      // 遍历所有log
+      this.userData.forEach(log => {
+        // 找到end节点
+        const endNode = log.nodes[log.nodes.length - 1]
+        const endName = endNode.nodeType + ' ' + this.graph.data.nodes.findIndex(x => x.nodeType === 5 && x.index === endNode.nodeIndex)
+        // console.log(endName)
+        const resultpath = []
+        this.sankeyOption.series[0].data.forEach(node => {
+          const type = node.name.split(' ')[0]
+          const index = this.sankeyOption.series[0].data.findIndex(x => x === node)
+          if (type === 'InteractionPoint') {
+            resultpath.push(pathFinder.find(index, this.sankeyOption.series[0].data.findIndex(x => x.name === endName)))
+          }
+        })
+        const weight = new Map()
+        resultpath.forEach(path => {
+          weight.set(path[path.length - 1].data, (1 / (path.length - 1)).toFixed(2))
+        })
+        // console.log('weight', weight)
+        // 算出三个点的权值
+        const currentIndex = log.nodes.findIndex(x => x.nodeType === 'InteractionPoint' && x.nodeIndex === this.graph.data.nodes[this.nodeIndex].index)
+        if (currentIndex !== -1) {
+          // console.log('currentIndex', currentIndex)
+          let lastIndex, nextIndex, lastWeight, nextWeight
+          const currentWeight = weight.get('InteractionPoint' + ' ' + this.graph.data.nodes.findIndex(x => x.nodeType === 0 && x.index === log.nodes[currentIndex].nodeIndex))
+          for (let i = currentIndex - 1; i >= 0; i--) {
+            if (log.nodes[i].nodeType === 'InteractionPoint') {
+              lastIndex = i
+              lastWeight = weight.get('InteractionPoint' + ' ' + this.graph.data.nodes.findIndex(x => x.nodeType === 0 && x.index === log.nodes[lastIndex].nodeIndex))
+              break
+            }
+          }
+          for (let i = currentIndex + 1; i < log.nodes.length; i++) {
+            if (log.nodes[i].nodeType === 'InteractionPoint') {
+              nextIndex = i
+              nextWeight = weight.get('InteractionPoint' + ' ' + this.graph.data.nodes.findIndex(x => x.nodeType === 0 && x.index === log.nodes[nextIndex].nodeIndex))
+              break
+            }
+          }
+          const currentIndexes = [lastIndex, currentIndex, nextIndex]
+          const currentWeights = [lastWeight, currentWeight, nextWeight]
+          // console.log(currentWeights)
+          // 权值乘以事件
+          const weightTime = []
+          for (let i = 0; i < 3; i++) {
+            if (currentWeights[i] !== undefined)weightTime.push(log.nodes[currentIndexes[i]].costTime * currentWeights[i])
+            else weightTime.push(0)
+          }
+          // console.log('weightTime', weightTime)
+          // 添加进res数组
+          res.push(weightTime)
+        }
+      })
+      // 返回res
+      // console.log(res)
+      return res
+    }
   }
 }
 </script>
