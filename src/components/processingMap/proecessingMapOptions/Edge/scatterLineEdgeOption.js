@@ -1,4 +1,4 @@
-export const scatterLineNodeOption = {
+export const scatterLineEdgeOption = {
   tooltip: {
     // trigger: 'axis',
     axisPointer: {
@@ -40,11 +40,11 @@ export const scatterLineNodeOption = {
     {
       name: 'boxplot',
       type: 'boxplot',
+      data: [],
       itemStyle: {
         borderColor: '#3fc1c9',
         borderWidth: 2
       },
-      data: [],
       z: 0,
     },
     {

@@ -10,6 +10,7 @@ import OverviewComponent from '@/components/processingMap/OverviewComponent.vue'
 import NodeInformationComponent from '@/components/processingMap/NodeInformationComponent.vue'
 import EdgeInformationComponent from '@/components/processingMap/EdgeInformationComponent.vue'
 import PathInformationComponent from '@/components/processingMap/PathInformationComponent.vue'
+import NodeListComponent from '@/components/processingMap/NodeListComponent.vue'
 import roam from '@/components/processingMap/themes/roma.json'
 
 const nodeType = new Map([[0, 'InteractionPoint'],
@@ -66,16 +67,17 @@ export default {
     EdgeInformationComponent,
     NodeInformationComponent,
     OverviewComponent,
-    vchart: ECharts
+    NodeListComponent,
+    vchart: ECharts,
   },
   mounted () {
     ref(axios.get($NetworkStoreUrl + 'processingMapGraph.json').then((res) => {
       this.graphMap = res
-      console.log(res)
+      // console.log(res)
     }))
     ref(axios.get($NetworkStoreUrl + 'processingMapData.json').then((data) => {
       this.graphData = data
-      console.log(data)
+      // console.log(data)
     }))
 
     // // 本地
@@ -85,31 +87,31 @@ export default {
     // }))
     // ref(axios.get('/ProcessingMap/processingMapData.json').then((data) => {
     //   this.graphData = data
-    //   // console.log(data)
+    //   // // console.log(data)
     // }))
-    console.log(this.$refs.dagChart)
-    console.log(this.$refs.sankeyChart)
-
-    const data = { features: [0.9, 0.9] } // 要发送给后端的数据
-
-    fetch('http://localhost:5000/predict', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(data),
-    })
-      .then(response => response.json())
-      .then(data => {
-        console.log('Prediction:', data.prediction)
-      })
-      .catch(error => {
-        console.error('Error:', error)
-      })
+    // console.log(this.$refs.dagChart)
+    // console.log(this.$refs.sankeyChart)
+    //
+    // const data = { features: [0.9, 0.9] } // 要发送给后端的数据
+    //
+    // fetch('http://localhost:5000/predict', {
+    //   method: 'POST',
+    //   headers: {
+    //     'Content-Type': 'application/json',
+    //   },
+    //   body: JSON.stringify(data),
+    // })
+    //   .then(response => response.json())
+    //   .then(data => {
+    //     // console.log('Prediction:', data.prediction)
+    //   })
+    //   .catch(error => {
+    //     console.error('Error:', error)
+    //   })
   },
   watch: {
     graphMap () {
-      // console.log('graphMap新值：', newVal)
+      // // console.log('graphMap新值：', newVal)
       this.ReadJsonMakeProcessingGraph()
     },
     graphData () {
@@ -117,13 +119,13 @@ export default {
     },
     selectList: {
       handler () {
-        // console.log(newVal)
+        // // console.log(newVal)
         this.CheckSelectedList(0)
       },
       deep: true
     },
     async userData () {
-      // console.log(this.sOption.series[0].links)
+      // // console.log(this.sOption.series[0].links)
       // 处理数据
       this.userData.forEach(log => {
         log.nodes.forEach(node => {
@@ -156,15 +158,12 @@ export default {
                 this.sOption.series[0].links[this.sOption.series[0].links.findIndex(
                   l => ((l.source === sourceName) && (l.target === targetName)
                   )) + offset].value++
-                // this.sOption.series[0].links[this.sOption.series[0].links.findIndex(
-                //   l => ((l.source === sourceName) && (l.target === targetName)
-                //   ))].value++
-                // console.log(sourceName, targetName, pointOption.get(this.GetNodeArrayIndex(log.nodes[nextIndex].nodeType, log.nodes[nextIndex].nodeIndex)).findIndex(i => i === optionIndex))
               }
               break
           }
         })
       })
+      this.ChangeSankeyColor()
       this.isLoadingSankey = false
     }
   },
@@ -234,7 +233,8 @@ export default {
             temp.category = 0
             // 在桑基图中添加节点
             this.sOption.series[0].data.push({
-              name: nodeType.get(this.graphMap.data.nodes[i].nodeType) + ' ' + i.toString()
+              name: nodeType.get(this.graphMap.data.nodes[i].nodeType) + ' ' + i.toString(),
+              itemStyle: {}
             })
             break
           case 'Option':
@@ -254,6 +254,7 @@ export default {
             // 在桑基图中添加节点
             this.sOption.series[0].data.push({
               name: nodeType.get(this.graphMap.data.nodes[i].nodeType) + ' ' + i.toString(),
+              itemStyle: {}
             })
             break
           case 'Event':
@@ -330,7 +331,7 @@ export default {
             result = FindNextInteractionNode(n.id)
           }
         }, true)
-        // console.log('current id:', id, 'result:', result)
+        // // console.log('current id:', id, 'result:', result)
         return result // 返回最终结果
       }
     },
@@ -341,7 +342,7 @@ export default {
       return this.graphMap.data.nodes.findIndex(n => (nodeType.get(n.nodeType) === type && (nodeIndex === n.index)))
     },
     GraphSelectEvent (e) {
-      console.log(e)
+      // console.log(e)
       // 切换展示状态
       switch (e.dataType) {
         case 'node':
@@ -357,7 +358,7 @@ export default {
       }
     },
     SankeySelectEvent (e) {
-      console.log(e)
+      // console.log(e)
       // 切换展示状态
       switch (e.dataType) {
         case 'node':
@@ -366,7 +367,7 @@ export default {
           break
         case 'edge':
           this.EdgeShowEvent(e)
-          console.log(this.$refs.sankeyChart.getOption().series[e.seriesIndex].links[e.dataIndexInside])
+          // console.log(this.$refs.sankeyChart.getOption().series[e.seriesIndex].links[e.dataIndexInside])
           this.currentSelectedEdge = this.$refs.sankeyChart.getOption().series[e.seriesIndex].links[e.dataIndexInside]
           break
         default:
@@ -401,7 +402,7 @@ export default {
       this.isShowPath = false
     },
     GraphNodeShowEvent (e) {
-      console.log('e:', e)
+      // console.log('e:', e)
       // 处理缩放
       // 设置选中状态
       this.$refs.dagChart.dispatchAction({
@@ -409,12 +410,6 @@ export default {
         seriesIndex: e.seriesIndex,
         dataIndex: e.dataIndex
       })
-      // 添加/移除选中列表
-      // 判断是否在列表中
-      // console.log(e)
-      if (this.selectList.find(x => x === e) === undefined && e.type === 'select') { // 如果不在，则添加进列表
-        this.selectList.push(e)
-      }
 
       const nodeData = this.$refs.dagChart.getOption().series[e.seriesIndex].data[e.dataIndexInside]
       // 处理缩放
@@ -432,7 +427,7 @@ export default {
           zoom: 5
         }]
       })
-      // console.log(this.selectList)
+      // // console.log(this.selectList)
       if (this.isShowPath === true) return
       this.isShowNode = true
       this.isShowOverview = false
@@ -457,7 +452,13 @@ export default {
           zoom: 5
         }]
       })
-      // console.log(this.selectList)
+      // 添加/移除选中列表
+      // 判断是否在列表中
+      // // console.log(e)
+      if (this.selectList.find(x => x === e) === undefined && e.type === 'select') { // 如果不在，则添加进列表
+        this.selectList.push(e)
+      }
+      // // console.log(this.selectList)
       if (this.isShowPath === true) return
       this.isShowNode = true
       this.isShowOverview = false
@@ -465,7 +466,7 @@ export default {
       this.isShowPath = false
     },
     PathShowEvent () {
-      console.log('我触发了')
+      // console.log('我触发了')
       this.isShowPath = true
       this.isShowNode = false
       this.isShowOverview = false
@@ -483,6 +484,7 @@ export default {
       this.isClearSelected = false
     },
     CheckSelectedList () {
+      // console.log(this.selectList)
       // 如果合法，则在右侧展示路径信息
       if (this.CheckPath(0) === true) {
         this.PathShowEvent()
@@ -502,7 +504,7 @@ export default {
     CheckPath (nodeId) {
       if (this.selectList.find(x => x.dataIndexInside === nodeId)) {
         if (this.$refs.dagChart.getOption().series[0].data[nodeId].category === 5) {
-          // console.log('this.$refs.dagChart.getOption().series[0].data[nodeId]', this.$refs.dagChart.getOption().series[0].data[nodeId])
+          // // console.log('this.$refs.dagChart.getOption().series[0].data[nodeId]', this.$refs.dagChart.getOption().series[0].data[nodeId])
           return true
         } else {
           let nextNode
@@ -512,13 +514,71 @@ export default {
             }
           }, true)
           if (nextNode === undefined) return false
-          // console.log('currentNode:', nodeId, 'NextNode:', nextNode)
+          // // console.log('currentNode:', nodeId, 'NextNode:', nextNode)
           return this.CheckPath(nextNode)
         }
       } else {
         return false
       }
     },
+    ChangeSankeyColor () {
+      // convert #hex notation to rgb array
+      const parseColor = function (hexStr) {
+        return hexStr.length === 4 ? hexStr.substr(1).split('').map(function (s) { return 0x11 * parseInt(s, 16) }) : [hexStr.substr(1, 2), hexStr.substr(3, 2), hexStr.substr(5, 2)].map(function (s) { return parseInt(s, 16) })
+      }
+
+      // zero-pad 1 digit to 2
+      const pad = function (s) {
+        return (s.length === 1) ? '0' + s : s
+      }
+
+      const gradientColors = function (start, end, steps, gamma) {
+        let i; let j; let ms; let me; const output = []; const so = []
+        gamma = gamma || 1
+        const normalize = function (channel) {
+          return Math.pow(channel / 255, gamma)
+        }
+        start = parseColor(start).map(normalize)
+        end = parseColor(end).map(normalize)
+        for (i = 0; i < steps; i++) {
+          ms = i / (steps - 1)
+          me = 1 - ms
+          for (j = 0; j < 3; j++) {
+            so[j] = pad(Math.round(Math.pow(start[j] * me + end[j] * ms, 1 / gamma) * 255).toString(16))
+          }
+          output.push('#' + so.join(''))
+        }
+        return output
+      }
+      // 正式内容
+      const nodeCount = []
+      const MinColor = '#364f6b'
+      const MaxColor = '#fc5185'
+      // 统计总数量
+      this.sOption.series[0].data.forEach(node => {
+        nodeCount.push([node.name, 0])
+      })
+      this.sOption.series[0].links.forEach(link => {
+        const index = nodeCount.findIndex(x => x[0] === link.source)
+        const endIndex = nodeCount.findIndex(x => x[0] === link.target && x[0].split(' ')[0] === 'End')
+        if (index !== -1) {
+          nodeCount[index][1] += link.value
+        }
+        if (endIndex !== -1) {
+          nodeCount[endIndex][1] += link.value
+        }
+      })
+      this.sOption.series[0].data.forEach(node => {
+        let temp = nodeCount.find(x => x[0] === node.name)[1] / this.userData.length
+        if (temp < 0)temp = 0
+        node.itemStyle.color = gradientColors(MinColor, MaxColor, 100)[(temp * 100).toFixed(0) - 1]
+      })
+      this.sOption.series[0].links.forEach(link => {
+        let temp = link.value / this.userData.length
+        if (temp < 0)temp = 0
+        link.lineStyle.color = gradientColors(MinColor, MaxColor, 100)[(temp * 100).toFixed(0) - 1]
+      })
+    }
   }
 }
 </script>
@@ -527,19 +587,27 @@ export default {
   <el-container style="height: 100%">
     <el-aside width="70%">
       <div style="height: 94%; width:98%">
-        <el-col style="height: 50%">
-          <vchart class="echart" :option="option" :theme=theme :autoresize="true" ref="dagChart"
-                  @select="GraphSelectEvent"
-                  @unselect="UnselectEvent"
-                  @zr:click="UnselectEvent"
-                  @zr:dblclick="this.isClearSelected = true">
-          </vchart>
-        </el-col>
+        <el-row :gutter="20" style="height: 50%">
+          <el-col  :span="6">
+                <NodeListComponent  class="nodeList"
+                                    :selectedList=" this.selectList"
+                                    :nodes="sOption.series[0].data"
+                                    :sankey-option="sOption"/>
+          </el-col>
+          <el-col :span="18">
+            <vchart class="dgaChart" :option="option" :theme=theme :autoresize="true" ref="dagChart"
+                    @select="GraphSelectEvent"
+                    @unselect="UnselectEvent"
+                    @zr:click="UnselectEvent"
+                    @zr:dblclick="this.isClearSelected = true">
+            </vchart>
+          </el-col>
+        </el-row>
         <el-divider/>
         <el-col style="height: 50%" v-loading.fullscreen.lock="isLoadingSankey"
                 element-loading-text="数据初始化..."
                 element-loading-background="rgba(0, 0, 0, 0.7)">
-          <vchart class="echart" :option="sOption" :theme=theme :autoresize="true" ref="sankeyChart"
+          <vchart class="sankeyChart" :option="sOption" :theme=theme :autoresize="true" ref="sankeyChart"
                   @select="SankeySelectEvent"
                   @zr:click="UnselectEvent">
           </vchart>
@@ -559,14 +627,18 @@ export default {
                                 :sankeyOption="sOption"
                                 :node-info="currentSelectedNode"/>
       <EdgeInformationComponent v-if="isShowEdge" style="height: 100%;width: 100%"
+                                :graph="graphMap"
+                                :graph-data="graphData"
+                                :user-data="userData"
+                                :sankeyOption="sOption"
                                 :edgeInfo="currentSelectedEdge"/>
       <PathInformationComponent v-if="isShowPath" style="height: 100%;width: 100%"/>
     </el-main>
   </el-container>
   <el-dialog
-    v-model="isClearSelected"
-    title="Tips"
-    width="500"
+      v-model="isClearSelected"
+      title="Tips"
+      width="500"
   >
     <span>是否要清除所有选择的结点？</span>
     <template #footer>
@@ -581,13 +653,22 @@ export default {
 </template>
 
 <style scoped>
-.echart {
+.dgaChart {
+  height: 100%;
+  border: gray solid 1px;
+  border-radius: 10px;
+}
+.sankeyChart {
   height: 100%;
   width: 100%;
   border: gray solid 1px;
   border-radius: 10px;
 }
-
+.nodeList{
+  height: 100%;
+  border: gray solid 1px;
+  border-radius: 10px;
+}
 .rightSide {
   border: gray solid 1px;
   border-radius: 10px;

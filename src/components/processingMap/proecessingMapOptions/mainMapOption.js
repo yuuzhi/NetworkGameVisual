@@ -62,6 +62,9 @@ export const mainOption = {
           {
             name: '5',
             symbol: 'circle',
+            itemStyle: {
+              color: '#364f6b'
+            }
           },
           {
             name: '6',
@@ -74,7 +77,7 @@ export const mainOption = {
             symbolSize: 0,
           },
         ],
-        edgeSymbol: ['circle', 'arrow'],
+        // edgeSymbol: ['circle', 'arrow'],
         edgeSymbolSize: [5, 5],
         edgeLabel: {
           fontSize: 100
