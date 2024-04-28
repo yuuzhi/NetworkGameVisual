@@ -46,6 +46,7 @@ export default {
         logNum: 0
       },
       currentSelectedNode: null,
+      currentSelectedEdge: null,
       // 状态
       sankeyMapState: false,
       isShowOverview: true,
@@ -349,6 +350,7 @@ export default {
           break
         case 'edge':
           this.EdgeShowEvent(e)
+          this.currentSelectedEdge = this.$refs.dagChart.getOption().series[e.seriesIndex].links[e.dataIndexInside]
           break
         default:
           this.UnselectEvent(e)
@@ -364,6 +366,8 @@ export default {
           break
         case 'edge':
           this.EdgeShowEvent(e)
+          console.log(this.$refs.sankeyChart.getOption().series[e.seriesIndex].links[e.dataIndexInside])
+          this.currentSelectedEdge = this.$refs.sankeyChart.getOption().series[e.seriesIndex].links[e.dataIndexInside]
           break
         default:
           this.UnselectEvent(e)
@@ -554,7 +558,8 @@ export default {
                                 :user-data="userData"
                                 :sankeyOption="sOption"
                                 :node-info="currentSelectedNode"/>
-      <EdgeInformationComponent v-if="isShowEdge" style="height: 100%;width: 100%"/>
+      <EdgeInformationComponent v-if="isShowEdge" style="height: 100%;width: 100%"
+                                :edgeInfo="currentSelectedEdge"/>
       <PathInformationComponent v-if="isShowPath" style="height: 100%;width: 100%"/>
     </el-main>
   </el-container>
