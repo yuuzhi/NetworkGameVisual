@@ -27,16 +27,20 @@ export default {
 </script>
 
 <template>
-  <el-scrollbar height="45vh" >
-    <div>
-      <NodeElementComponent v-for="(nodes,index) in nodes"
-                            :key="index"
-                            :name="nodes.name"
-                            :index="index" ref="NodeList"/>
+  <div style="height: 32vh;width: 100%">
+    <div style="height: 2vh;width: 100%;padding: 10px">
+      <el-text style="font-size: large;align-items: center;" tag="b">结点列表</el-text>
     </div>
-
-  </el-scrollbar>
-
+    <div style="height: 1vh"></div>
+    <el-scrollbar height="26vh" >
+      <div>
+        <NodeElementComponent v-for="(nodes,index) in nodes"
+                              :key="index"
+                              :name="nodes.name"
+                              :index="index" ref="NodeList"/>
+      </div>
+    </el-scrollbar>
+  </div>
 </template>
 
 <style scoped>
@@ -44,7 +48,7 @@ export default {
   display: flex;
   align-items: center;
   justify-content: center;
-  height: 50px;
+  height: 40px;
   margin: 10px;
   text-align: center;
   border-radius: 4px;

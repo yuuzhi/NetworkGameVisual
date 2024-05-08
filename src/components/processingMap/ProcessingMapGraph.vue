@@ -12,6 +12,8 @@ import EdgeInformationComponent from '@/components/processingMap/EdgeInformation
 import PathInformationComponent from '@/components/processingMap/PathInformationComponent.vue'
 import NodeListComponent from '@/components/processingMap/NodeListComponent.vue'
 import roam from '@/components/processingMap/themes/roma.json'
+import ToolComponent from '@/components/processingMap/ToolComponent.vue'
+import GraphStateComponent from '@/components/processingMap/GraphStateComponent.vue'
 
 const nodeType = new Map([[0, 'InteractionPoint'],
   [1, 'Option'],
@@ -63,6 +65,8 @@ export default {
     }
   },
   components: {
+    GraphStateComponent,
+    ToolComponent,
     PathInformationComponent,
     EdgeInformationComponent,
     NodeInformationComponent,
@@ -79,35 +83,6 @@ export default {
       this.graphData = data
       // console.log(data)
     }))
-
-    // // 本地
-    // ref(axios.get('/ProcessingMap/processingMapGraph.json').then((res) => {
-    //   this.graphMap = res
-    //   // console.log(res)
-    // }))
-    // ref(axios.get('/ProcessingMap/processingMapData.json').then((data) => {
-    //   this.graphData = data
-    //   // // console.log(data)
-    // }))
-    // console.log(this.$refs.dagChart)
-    // console.log(this.$refs.sankeyChart)
-    //
-    // const data = { features: [0.9, 0.9] } // 要发送给后端的数据
-    //
-    // fetch('http://localhost:5000/predict', {
-    //   method: 'POST',
-    //   headers: {
-    //     'Content-Type': 'application/json',
-    //   },
-    //   body: JSON.stringify(data),
-    // })
-    //   .then(response => response.json())
-    //   .then(data => {
-    //     // console.log('Prediction:', data.prediction)
-    //   })
-    //   .catch(error => {
-    //     console.error('Error:', error)
-    //   })
   },
   watch: {
     graphMap () {
@@ -589,18 +564,30 @@ export default {
       <div style="height: 94%; width:98%">
         <el-row :gutter="20" style="height: 50%">
           <el-col  :span="6">
-                <NodeListComponent  class="nodeList"
-                                    :selectedList=" this.selectList"
-                                    :nodes="sOption.series[0].data"
-                                    :sankey-option="sOption"/>
+            <el-row>
+              <ToolComponent class="tool"></ToolComponent>
+            </el-row>
+            <div style="height: 2vh"/>
+            <el-row>
+              <NodeListComponent  class="nodeList"
+                                  :selectedList=" this.selectList"
+                                  :nodes="sOption.series[0].data"
+                                  :sankey-option="sOption"/>
+            </el-row>
           </el-col>
           <el-col :span="18">
-            <vchart class="dgaChart" :option="option" :theme=theme :autoresize="true" ref="dagChart"
-                    @select="GraphSelectEvent"
-                    @unselect="UnselectEvent"
-                    @zr:click="UnselectEvent"
-                    @zr:dblclick="this.isClearSelected = true">
-            </vchart>
+            <el-row>
+              <graph-state-component class="graphState"/>
+            </el-row>
+            <div style="height: 2vh"/>
+            <el-row>
+              <vchart class="dgaChart" :option="option" :theme=theme :autoresize="true" ref="dagChart"
+                      @select="GraphSelectEvent"
+                      @unselect="UnselectEvent"
+                      @zr:click="UnselectEvent"
+                      @zr:dblclick="this.isClearSelected = true">
+              </vchart>
+            </el-row>
           </el-col>
         </el-row>
         <el-divider/>
@@ -654,7 +641,7 @@ export default {
 
 <style scoped>
 .dgaChart {
-  height: 100%;
+  height: 32vh;
   border: gray solid 1px;
   border-radius: 10px;
 }
@@ -665,7 +652,6 @@ export default {
   border-radius: 10px;
 }
 .nodeList{
-  height: 100%;
   border: gray solid 1px;
   border-radius: 10px;
 }
@@ -673,5 +659,16 @@ export default {
   border: gray solid 1px;
   border-radius: 10px;
   height: 870px;
+}
+
+.tool{
+  height: 10%;
+  border: gray solid 1px;
+  border-radius: 10px;
+}
+.graphState{
+  height: 10%;
+  border: gray solid 1px;
+  border-radius: 10px;
 }
 </style>

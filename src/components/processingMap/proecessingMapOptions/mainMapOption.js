@@ -1,5 +1,7 @@
 export const mainOption = {
-  title: {},
+  title: {
+    text: '叙事结构拓扑图'
+  },
   tooltip: {},
   dataZoom: {
     type: 'inside',
@@ -42,22 +44,22 @@ export const mainOption = {
           {
             name: '1',
             symbol: 'circle',
-            symbolSize: 0,
+            symbolSize: 5,
           },
           {
             name: '2',
             symbol: 'rect',
-            symbolSize: 0,
+            symbolSize: 5,
           },
           {
             name: '3',
             symbol: 'roundRect',
-            symbolSize: 0,
+            symbolSize: 5,
           },
           {
             name: '4',
             symbol: 'roundRect',
-            symbolSize: 0,
+            symbolSize: 5,
           },
           {
             name: '5',
@@ -69,12 +71,12 @@ export const mainOption = {
           {
             name: '6',
             symbol: 'roundRect',
-            symbolSize: 0,
+            symbolSize: 5,
           },
           {
             name: '7',
             symbol: 'roundRect',
-            symbolSize: 0,
+            symbolSize: 5,
           },
         ],
         // edgeSymbol: ['circle', 'arrow'],
