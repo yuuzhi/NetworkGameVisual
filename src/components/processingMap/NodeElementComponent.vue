@@ -10,19 +10,22 @@ export default {
       isChecked: false
     }
   },
+  watch: {
+    isChecked () {
+      // console.log(this.isChecked)
+      this.$refs.checkbox.$forceUpdate()
+    }
+  },
   methods: {
     SelectedChangedEvent () {
       // console.log(this.name)
-    },
-    Checked () {
-      this.isChecked = true
     }
   }
 }
 </script>
 
 <template>
-    <el-checkbox class="checkButton"  size="large" border @change="SelectedChangedEvent" :checked="isChecked">
+    <el-checkbox class="checkButton"  size="large" border v-model="this.isChecked" ref="checkbox">
       {{name}}
     </el-checkbox>
 </template>

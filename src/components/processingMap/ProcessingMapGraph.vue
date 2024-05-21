@@ -25,6 +25,50 @@ const nodeType = new Map([[0, 'InteractionPoint'],
   [7, 'Feedback'],
   [8, 'Obsolete']])
 
+const defaultCategory = [
+  {
+    name: '0',
+    symbol: 'diamond',
+  },
+  {
+    name: '1',
+    symbol: 'circle',
+    symbolSize: 5,
+  },
+  {
+    name: '2',
+    symbol: 'rect',
+    symbolSize: 5,
+  },
+  {
+    name: '3',
+    symbol: 'roundRect',
+    symbolSize: 5,
+  },
+  {
+    name: '4',
+    symbol: 'roundRect',
+    symbolSize: 5,
+  },
+  {
+    name: '5',
+    symbol: 'circle',
+    itemStyle: {
+      color: '#364f6b'
+    }
+  },
+  {
+    name: '6',
+    symbol: 'roundRect',
+    symbolSize: 5,
+  },
+  {
+    name: '7',
+    symbol: 'roundRect',
+    symbolSize: 5,
+  },
+]
+
 const processingMapGraph = createGraph()
 
 const $NetworkStoreUrl = 'https://baishe.obs.cn-north-4.myhuaweicloud.com/'
@@ -50,6 +94,7 @@ export default {
       },
       currentSelectedNode: null,
       currentSelectedEdge: null,
+      input: '',
       // 状态
       sankeyMapState: false,
       isShowOverview: true,
@@ -60,6 +105,7 @@ export default {
       isClearSelected: false,
       isLoadingDag: true,
       isLoadingSankey: true,
+      dagState: 'default',
       // 其他
       theme: roam
     }
@@ -84,6 +130,9 @@ export default {
       // console.log(data)
     }))
   },
+  computed: {
+
+  },
   watch: {
     graphMap () {
       // // console.log('graphMap新值：', newVal)
@@ -93,8 +142,8 @@ export default {
       this.ReadPathMakeProcessingData()
     },
     selectList: {
-      handler () {
-        // // console.log(newVal)
+      handler (newVal) {
+        // console.log(newVal)
         this.CheckSelectedList(0)
       },
       deep: true
@@ -140,6 +189,66 @@ export default {
       })
       this.ChangeSankeyColor()
       this.isLoadingSankey = false
+    },
+    dagState () {
+      // 切换缩放和中心点
+      this.$refs.dagChart.setOption({
+        series: [{
+          zoom: 1,
+        }]
+      })
+      switch (this.dagState) {
+        case 'default':
+          this.option.series[0].data.forEach(i => {
+            i.itemStyle = {}
+          })
+          this.option.series[0].categories = defaultCategory
+          this.option.series[0].data.forEach(i => {
+            i.itemStyle = {}
+          })
+          break
+        case 'remainPath':
+          if (this.currentSelectedNode !== null) {
+            this.ChangeRemainColor()
+          }
+          break
+        case 'onePath':
+          this.ChangeOnePathColor()
+          break
+      }
+    },
+    input () {
+      console.log(this.input)
+      switch (this.dagState) {
+        case 'onePath':
+          this.ChangeOnePathColor()
+          break
+        default: {
+          break
+        }
+      }
+    },
+    currentSelectedNode () {
+      // 处理显示
+      console.log('this.dagState', this.dagState)
+      console.log(this.userData)
+      switch (this.dagState) {
+        case 'default':
+          this.option.series[0].data.forEach(i => {
+            i.itemStyle = {}
+          })
+          this.option.series[0].categories = defaultCategory
+          break
+        case 'remainPath':
+          this.ChangeRemainColor()
+          break
+        case 'onePath':
+          this.ChangeOnePathColor()
+          break
+        default: {
+          break
+        }
+      }
     }
   },
   methods: {
@@ -201,7 +310,8 @@ export default {
         const temp = {
           name: nodeType.get(this.graphMap.data.nodes[i].nodeType) + ' ' + i.toString(),
           x: this.dargeGraph.node(i).x,
-          y: this.dargeGraph.node(i).y
+          y: this.dargeGraph.node(i).y,
+          itemStyle: {}
         }
         switch (nodeType.get(this.graphMap.data.nodes[i].nodeType)) {
           case 'InteractionPoint':
@@ -358,11 +468,11 @@ export default {
       if (this.isShowPath === true) return
       if (e.target === undefined) {
         // 切换缩放和中心点
-        this.$refs.dagChart.setOption({
-          series: [{
-            zoom: 1,
-          }]
-        })
+        // this.$refs.dagChart.setOption({
+        //   series: [{
+        //     zoom: 1,
+        //   }]
+        // })
         this.isShowOverview = true
         this.isShowNode = false
         this.isShowEdge = false
@@ -387,6 +497,14 @@ export default {
       })
 
       const nodeData = this.$refs.dagChart.getOption().series[e.seriesIndex].data[e.dataIndexInside]
+
+      // 添加/移除选中列表
+      // 判断是否在列表中
+      // // console.log(e)
+      if (this.selectList.find(x => x === e) === undefined && e.type === 'select') { // 如果不在，则添加进列表
+        this.selectList.push(e)
+      }
+
       // 处理缩放
       const selectedNodeX = nodeData.x
       const selectedNodeY = nodeData.y
@@ -416,23 +534,18 @@ export default {
       const selectedNodeX = nodeData.x
       const selectedNodeY = nodeData.y
       // 设置新的视图中心为选中节点的位置
-      this.$refs.dagChart.setOption({
-        series: [{
-          center: [selectedNodeX, selectedNodeY]
-        }]
-      })
+      // this.$refs.dagChart.setOption({
+      //   series: [{
+      //     center: [selectedNodeX, selectedNodeY]
+      //   }]
+      // })
       // 进行放大缩放
       this.$refs.dagChart.setOption({
         series: [{
           zoom: 5
         }]
       })
-      // 添加/移除选中列表
-      // 判断是否在列表中
-      // // console.log(e)
-      if (this.selectList.find(x => x === e) === undefined && e.type === 'select') { // 如果不在，则添加进列表
-        this.selectList.push(e)
-      }
+
       // // console.log(this.selectList)
       if (this.isShowPath === true) return
       this.isShowNode = true
@@ -484,6 +597,7 @@ export default {
         } else {
           let nextNode
           processingMapGraph.forEachLinkedNode(nodeId, n => {
+            console.log(nodeId)
             if (this.selectList.find(x => x.dataIndexInside === n.id)) {
               nextNode = n.id
             }
@@ -497,6 +611,7 @@ export default {
       }
     },
     ChangeSankeyColor () {
+      // 流量映射
       // convert #hex notation to rgb array
       const parseColor = function (hexStr) {
         return hexStr.length === 4 ? hexStr.substr(1).split('').map(function (s) { return 0x11 * parseInt(s, 16) }) : [hexStr.substr(1, 2), hexStr.substr(3, 2), hexStr.substr(5, 2)].map(function (s) { return parseInt(s, 16) })
@@ -553,8 +668,76 @@ export default {
         if (temp < 0)temp = 0
         link.lineStyle.color = gradientColors(MinColor, MaxColor, 100)[(temp * 100).toFixed(0) - 1]
       })
+    },
+    GraphStateChangedEvent (newState) {
+      // console.log('newState', newState)
+      this.dagState = newState
+    },
+    ChangeRemainColor () {
+      if (this.currentSelectedNode !== null) {
+        this.option.series[0].data.forEach(i => {
+          i.itemStyle.color = '#f3d999'
+        })
+        // 获取所有之后的结点
+        // console.log(this.currentSelectedNode)
+        const remainNodes = this.GetRemainNodes(this.currentSelectedNode.split(' ')[1], [])
+        // console.log('remainNodes', remainNodes)
+        // 改变结点颜色为一个颜色
+        remainNodes.forEach(i => {
+          // console.log(this.option.series[0].data[i])
+          this.option.series[0].data[i].itemStyle.color = '#8b4513'
+        })
+        this.$refs.dagChart.setOption(this.option)
+      }
+    },
+    ChangeOnePathColor () {
+      // 获取结点
+      const remainNodes = []
+      const log = this.userData.find(x => x.logID === this.input)
+      // console.log(this.input)
+      if (log !== undefined) {
+        this.option.series[0].data.forEach(i => {
+          i.itemStyle.color = '#f3d999'
+        })
+        log.nodes.forEach(n => {
+          remainNodes.push(this.GetNodeArrayIndex(n.nodeType, n.nodeIndex))
+          // console.log(this.GetNodeArrayObject(n.nodeType, n.nodeIndex))
+        })
+        // 改变结点颜色为一个颜色
+        remainNodes.forEach(i => {
+          this.option.series[0].data[i].itemStyle.color = '#8b4513'
+        })
+        this.$refs.dagChart.setOption(this.option)
+      }
+    },
+    GetRemainNodes (nodeId, result) {
+      // console.log(nodeId)
+      // 到达结局结点
+      if (this.$refs.dagChart.getOption().series[0].data[nodeId].category === 5) {
+        // console.log(this.$refs.dagChart.getOption().series[0].data[nodeId].category)
+        return result
+      } else {
+        // 否则，判断下一个结点
+        let nextNode
+        const nextNodes = []
+        processingMapGraph.forEachLinkedNode(Number(nodeId), n => {
+          nextNodes.push(n.id)
+          if (result.find(x => x === n.id) === undefined) { result.push(n.id) }
+        }, true)
+        let temp = []
+        // console.log(nextNodes)
+        nextNodes.forEach(x => {
+          temp = [...new Set(this.GetRemainNodes(x, result).concat(result))]
+          // console.log(temp)
+        })
+        return temp
+      }
+    },
+    InputCheckedEvent (input) {
+      this.input = input
     }
   }
+
 }
 </script>
 
@@ -571,13 +754,14 @@ export default {
             <el-row>
               <NodeListComponent  class="nodeList"
                                   :selectedList=" this.selectList"
-                                  :nodes="sOption.series[0].data"
+                                  :nodes="option.series[0].data"
                                   :sankey-option="sOption"/>
             </el-row>
           </el-col>
           <el-col :span="18">
             <el-row>
-              <graph-state-component class="graphState"/>
+              <graph-state-component class="graphState" @SelectChangedEvent="this.GraphStateChangedEvent"
+              @InputCheckedEvent="this.InputCheckedEvent"/>
             </el-row>
             <div style="height: 2vh"/>
             <el-row>
@@ -619,7 +803,14 @@ export default {
                                 :user-data="userData"
                                 :sankeyOption="sOption"
                                 :edgeInfo="currentSelectedEdge"/>
-      <PathInformationComponent v-if="isShowPath" style="height: 100%;width: 100%"/>
+      <PathInformationComponent v-if="isShowPath" style="height: 100%;width: 100%"
+                                :graph="graphMap"
+                                :graph-data="graphData"
+                                :user-data="userData"
+                                :sankeyOption="sOption"
+                                :selectedList=" this.selectList"
+                                :nodes="option.series[0].data"
+                                :dag-option="option"/>
     </el-main>
   </el-container>
   <el-dialog

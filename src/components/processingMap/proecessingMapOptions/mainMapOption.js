@@ -26,7 +26,7 @@ export const mainOption = {
         selectedMode: 'multiple',
         select: {
           itemStyle: {
-            color: '#fc5185'
+            color: '#900090'
           }
         },
         roam: true,

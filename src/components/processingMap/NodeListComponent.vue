@@ -14,10 +14,13 @@ export default {
   watch: {
     selectedList: {
       handler () {
+        // console.log('selectedList，', this.selectedList)
         this.$refs.NodeList.forEach(x => {
-          if (this.selectedList.find(selected => x.name === this.sankeyOption.series[0].data[selected.dataIndexInside].name) !== undefined) {
-            console.log(x)
-          }
+          x.isChecked = false
+        })
+        this.selectedList.forEach(x => {
+          this.$refs.NodeList[x.dataIndexInside].isChecked = true
+          // console.log(this.$refs.NodeList[x.dataIndexInside].isChecked)
         })
       },
       deep: true
@@ -44,22 +47,4 @@ export default {
 </template>
 
 <style scoped>
-.scrollbar-demo-item {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  height: 40px;
-  margin: 10px;
-  text-align: center;
-  border-radius: 4px;
-  background: var(--el-color-primary-light-9);
-  color: var(--el-color-primary);
-}
-:deep(.el-scrollbar__wrap ){
-  overflow-x: hidden !important;
-}
-:deep(.el-scrollbar__bar.is-horizontal) {
-  height: 0 !important;
-}
-
 </style>
